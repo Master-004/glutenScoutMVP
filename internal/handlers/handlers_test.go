@@ -11,16 +11,58 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Master-004/glutenscout/internal/models"
+	"github.com/Master-004/glutenscout/internal/store"
 	"github.com/Master-004/glutenscout/web"
 )
 
 // fakeStore stands in for the real database so handler tests run without
 // Postgres. Set fields to control what each method returns.
 type fakeStore struct {
-	pingErr error
+	pingErr     error
+	cities      []models.City
+	restaurants map[int64][]models.RestaurantSummary // keyed by city id
+	err         error                                // if set, data methods fail with it
 }
 
 func (f *fakeStore) Ping(ctx context.Context) error { return f.pingErr }
+
+func (f *fakeStore) ListCities(ctx context.Context) ([]models.City, error) {
+	return f.cities, f.err
+}
+
+func (f *fakeStore) GetCityBySlug(ctx context.Context, slug string) (models.City, error) {
+	if f.err != nil {
+		return models.City{}, f.err
+	}
+	for _, c := range f.cities {
+		if c.Slug == slug {
+			return c, nil
+		}
+	}
+	return models.City{}, store.ErrNotFound
+}
+
+func (f *fakeStore) ListRestaurantsByCity(ctx context.Context, cityID int64) ([]models.RestaurantSummary, error) {
+	return f.restaurants[cityID], f.err
+}
+
+// seededStore returns a fake with two cities: Provo (two restaurants) and
+// Emptyville (none).
+func seededStore() *fakeStore {
+	return &fakeStore{
+		cities: []models.City{
+			{ID: 1, Name: "Emptyville", State: "UT", Slug: "emptyville-ut"},
+			{ID: 2, Name: "Provo", State: "UT", Slug: "provo-ut"},
+		},
+		restaurants: map[int64][]models.RestaurantSummary{
+			2: {
+				{Restaurant: models.Restaurant{ID: 10, CityID: 2, Name: "Canyon Hearth Pizza", Cuisine: "Pizza", Address: "410 Timber Lane"}, MealCount: 3},
+				{Restaurant: models.Restaurant{ID: 11, CityID: 2, Name: "Solo Cafe", Cuisine: "Cafe", Address: "1 Main St"}, MealCount: 1},
+			},
+		},
+	}
+}
 
 // newTestServer builds the real routes with the real templates and a fake store.
 func newTestServer(t *testing.T, st Store) http.Handler {
@@ -75,15 +117,24 @@ func TestHealthz(t *testing.T) {
 }
 
 func TestHomePage(t *testing.T) {
-	rec := get(t, newTestServer(t, &fakeStore{}), "/")
+	rec := get(t, newTestServer(t, seededStore()), "/")
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200", rec.Code)
 	}
 	body := rec.Body.String()
-	for _, want := range []string{"GlutenScout — coming soon", disclaimer, "/static/css/app.css", "/static/js/htmx.min.js"} {
+	for _, want := range []string{
+		"Find gluten-free-friendly restaurants near you",
+		`<option value="provo-ut"`, "Provo, UT",
+		`hx-get="/restaurants"`, `hx-target="#results"`, `hx-push-url="true"`,
+		disclaimer, "/static/css/app.css", "/static/js/htmx.min.js",
+	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("home page missing %q", want)
 		}
+	}
+	// No city picked yet, so no results should render.
+	if strings.Contains(body, "restaurant-card") {
+		t.Error("home page should start with an empty results area")
 	}
 }
 

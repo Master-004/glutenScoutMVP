@@ -1,8 +1,39 @@
-{{define "title"}}Home{{end}}
+{{define "title"}}{{if .Selected}}Restaurants in {{.Selected.Name}}{{else}}Find GF restaurants{{end}}{{end}}
 
 {{define "content"}}
 <section class="hero">
-  <h1>GlutenScout — coming soon</h1>
-  <p>Find gluten-free-friendly restaurants and the meals the community trusts.</p>
+  <h1>Find gluten-free-friendly restaurants near you</h1>
+</section>
+
+{{/*
+  Progressive enhancement: the form works as a plain GET form (via the
+  <noscript> button) even without HTMX. With HTMX, changing the dropdown
+  fetches only the list fragment:
+    hx-get      = where to fetch from (the select's name/value is sent as ?city=...)
+    hx-trigger  = when to fetch (whenever the selection changes)
+    hx-target   = which element receives the response
+    hx-push-url = update the address bar so the result can be shared/bookmarked
+  hx-history="false": on Back/Forward, HTMX re-fetches the page from the
+  server instead of restoring its saved HTML snapshot. The snapshot can't
+  remember the dropdown's current choice, so it would show the wrong city.
+*/}}
+<form class="city-picker" action="/restaurants" method="get" hx-history="false">
+  <label for="city">Choose your city</label>
+  <select id="city" name="city"
+          hx-get="/restaurants"
+          hx-trigger="change"
+          hx-target="#results"
+          hx-push-url="true">
+    <option value="" disabled {{if not .Selected}}selected{{end}}>Select a city…</option>
+    {{range .Cities}}
+      <option value="{{.Slug}}" {{if and $.Selected (eq $.Selected.Slug .Slug)}}selected{{end}}>{{.Name}}, {{.State}}</option>
+    {{end}}
+  </select>
+  <noscript><button class="button" type="submit">Show restaurants</button></noscript>
+</form>
+
+{{/* aria-live makes screen readers announce the new results after a swap. */}}
+<section id="results" aria-live="polite">
+  {{if .Selected}}{{template "restaurant_list" .}}{{end}}
 </section>
 {{end}}

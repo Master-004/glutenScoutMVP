@@ -8,6 +8,8 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+
+	"github.com/Master-004/glutenscout/internal/models"
 )
 
 // Store is everything handlers need from the database. It's an interface
@@ -15,6 +17,10 @@ import (
 // and run without Postgres. Later slices add methods here.
 type Store interface {
 	Ping(ctx context.Context) error
+
+	ListCities(ctx context.Context) ([]models.City, error)
+	GetCityBySlug(ctx context.Context, slug string) (models.City, error)
+	ListRestaurantsByCity(ctx context.Context, cityID int64) ([]models.RestaurantSummary, error)
 }
 
 // Handler holds shared dependencies for all HTTP handlers.
@@ -40,6 +46,7 @@ func (h *Handler) Routes() http.Handler {
 	mux.HandleFunc("GET /healthz", h.health)
 	// "{$}" means "exactly /". Without it, "/" would match every URL.
 	mux.HandleFunc("GET /{$}", h.home)
+	mux.HandleFunc("GET /restaurants", h.restaurants)
 
 	// Catch-all: anything not matched above gets the friendly 404 page.
 	mux.HandleFunc("/", h.notFound)

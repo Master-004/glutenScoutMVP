@@ -74,6 +74,17 @@ func (h *Handler) render(w http.ResponseWriter, r *http.Request, status int, pag
 	writeHTML(w, status, buf)
 }
 
+// renderPartial writes just one named template (no layout), for HTMX to swap
+// into the page. page picks which template set to use; partials are in all sets.
+func (h *Handler) renderPartial(w http.ResponseWriter, r *http.Request, status int, page, name string, data any) {
+	buf, err := h.tmpl.execute(page, name, data)
+	if err != nil {
+		h.serverError(w, r, err)
+		return
+	}
+	writeHTML(w, status, buf)
+}
+
 func writeHTML(w http.ResponseWriter, status int, buf *bytes.Buffer) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(status)

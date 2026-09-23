@@ -1,0 +1,28 @@
+{{/*
+  The list of restaurant cards for one city. Rendered inside the full home
+  page, or on its own as the HTMX response when the dropdown changes.
+  Expects .Selected (the city) and .Restaurants.
+*/}}
+{{define "restaurant_list"}}
+{{/* HTMX moves a <title> found in a response into the browser tab, so the
+     tab (and any bookmark) names the city. Only for fragments: a full page
+     already has its <title> in the layout's <head>. */}}
+{{if .Fragment}}<title>Restaurants in {{.Selected.Name}} · GlutenScout</title>{{end}}
+<h2 class="results-heading">GF-friendly restaurants in {{.Selected.Name}}</h2>
+{{if .Restaurants}}
+<ul class="card-list">
+  {{range .Restaurants}}
+  <li>
+    <a class="card restaurant-card" href="/restaurants/{{.ID}}">
+      <h3>{{.Name}}</h3>
+      <p class="cuisine">{{.Cuisine}}</p>
+      <p class="address">{{.Address}}</p>
+      <p class="badge">{{.MealCount}} GF {{if eq .MealCount 1}}meal{{else}}meals{{end}}</p>
+    </a>
+  </li>
+  {{end}}
+</ul>
+{{else}}
+<p class="empty">No restaurants here yet.</p>
+{{end}}
+{{end}}
