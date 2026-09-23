@@ -1,0 +1,60 @@
+# `docker compose up --build` runs everything in order:
+#   db (Postgres) -> migrate (create tables) -> seed (sample data) -> app (web server)
+# Each step waits for the previous one via depends_on conditions.
+
+x-db-url: &db_url postgres://glutenscout:glutenscout@db:5432/glutenscout?sslmode=disable
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: glutenscout
+      POSTGRES_PASSWORD: glutenscout # local dev only, never use in production
+      POSTGRES_DB: glutenscout
+    ports:
+      - "5432:5432" # exposed so `go test` on your machine can reach the test DB
+    volumes:
+      - pgdata:/var/lib/postgresql/data # named volume: data survives restarts
+      - ./db/init:/docker-entrypoint-initdb.d:ro # runs once, on first start
+    healthcheck:
+      # -h 127.0.0.1 forces a TCP check: during first-time init Postgres runs a
+      # temporary socket-only server, and a socket check would pass too early.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U glutenscout -d glutenscout"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    build: .
+    image: glutenscout-app
+    command: ["/app/migrate"]
+    environment:
+      DATABASE_URL: *db_url
+    depends_on:
+      db:
+        condition: service_healthy
+
+  seed:
+    # The postgres image already includes psql, so no need to install it.
+    image: postgres:16
+    command: ["psql", "postgres://glutenscout:glutenscout@db:5432/glutenscout", "-v", "ON_ERROR_STOP=1", "-q", "-f", "/seed/seed.sql"]
+    volumes:
+      - ./seed:/seed:ro
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  app:
+    build: .
+    image: glutenscout-app
+    environment:
+      PORT: "8080"
+      DATABASE_URL: *db_url
+    ports:
+      - "8080:8080"
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:

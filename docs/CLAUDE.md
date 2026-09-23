@@ -1,0 +1,56 @@
+# GlutenScout — Project Guide for Claude Code
+
+## What we're building
+GlutenScout helps gluten-free (GF) people quickly find restaurants with safe food options.
+
+**Main user flow:** Pick a location → see GF-friendly restaurants → tap a restaurant to see its meals → review/upvote meals they trust.
+
+This is an MVP. Build only what the current slice asks for. Nice-to-have features are listed at the bottom so you know to leave them out.
+
+## How we work
+- The MVP is split into 4 slices. Each slice is a working, testable feature from database to screen.
+- Build one slice at a time, in order: `slice-0-foundation.md` → `slice-1-location-and-restaurants.md` → `slice-2-restaurant-meals.md` → `slice-3-reviews-and-upvotes.md`.
+- Before writing code for a slice, read its file and summarize your plan. Ask if anything is unclear.
+- A slice is done only when every item in its "Done when" checklist passes.
+- Keep things simple and readable. The developer is comfortable with Go but newer to web apps, so add short comments explaining *why*, not just *what*.
+
+## Tech stack (decided — don't swap these out)
+- **Language:** Go (1.22 or newer) for both backend and frontend.
+- **Web server & routing:** Go standard library `net/http` (use the Go 1.22 `ServeMux` method/path patterns like `GET /restaurants/{id}`). No web framework.
+- **Pages:** Server-rendered HTML with Go's `html/template`.
+- **Interactivity:** HTMX (loaded from a local file in `web/static/js/`) for small partial-page updates. No React, no custom JavaScript unless a slice says so.
+- **Styling:** One plain CSS file (`web/static/css/app.css`). Mobile-first — most users will be on phones.
+- **Database:** PostgreSQL, run locally with Docker Compose.
+- **DB driver:** `github.com/jackc/pgx/v5` (use `pgxpool`).
+- **Migrations:** `github.com/pressly/goose/v3`, SQL files in `migrations/`.
+- **Config:** Environment variables (e.g. `DATABASE_URL`, `PORT`) with a `.env.example` file.
+- **Tests:** Go's built-in `testing` package and `net/http/httptest`.
+
+## Project layout
+```
+glutenscout/
+├── cmd/server/main.go        # starts the web server
+├── internal/
+│   ├── store/                # all database queries live here
+│   ├── handlers/             # HTTP handlers (one file per feature area)
+│   └── models/               # plain Go structs (City, Restaurant, Meal, ...)
+├── migrations/               # goose SQL migrations
+├── seed/seed.sql             # sample data
+├── web/
+│   ├── templates/            # layout.html + page and partial templates
+│   └── static/               # css, js (htmx), images
+├── docker-compose.yml
+├── Makefile                  # make db-up, make migrate, make seed, make run, make test
+└── .env.example
+```
+
+## Rules of the road
+- Handlers stay thin: read the request, call `store`, render a template.
+- All SQL lives in `internal/store`. Always use query parameters (`$1`, `$2`), never string-building SQL.
+- Templates must escape user content (the default with `html/template` — don't use `template.HTML` on user input).
+- Show friendly error pages (404 and 500), never raw Go errors, to users.
+- Sample data uses **fictional** restaurants. Never claim a real restaurant is gluten-free.
+- Every page footer shows this disclaimer: *"GlutenScout info comes from the community and may be out of date. Always confirm with the restaurant before ordering."*
+
+## NOT in the MVP (don't build these yet)
+User accounts/login, verified users, photo uploads, sorting and filters (distance, best reviews, most options, type, reliability), allergen charts, other allergens (dairy, nuts, etc.), GF safety Q&A (cross-contamination, fryers), substitution info, community events, payments, a Swift/iOS app, and outside restaurant APIs (Google Places, Foursquare, etc.).

@@ -1,0 +1,30 @@
+{{/*
+  The shell every page shares. Each page file defines two blocks:
+  "title" (browser tab text) and "content" (what goes inside <main>).
+*/}}
+{{define "layout"}}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Makes phones render at device width instead of a zoomed-out desktop view. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{template "title" .}} · GlutenScout</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+  <!-- HTMX: lets hx-* attributes in our HTML fetch and swap page fragments. -->
+  <script src="/static/js/htmx.min.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="brand">GlutenScout</a>
+  </header>
+
+  <main class="container">
+    {{template "content" .}}
+  </main>
+
+  <footer class="site-footer">
+    <p>GlutenScout info comes from the community and may be out of date. Always confirm with the restaurant before ordering.</p>
+  </footer>
+</body>
+</html>
+{{end}}

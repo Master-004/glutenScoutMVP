@@ -1,0 +1,5 @@
+# Keep the Docker build context small; the image only needs Go source + embedded assets.
+.git
+docs
+*.md
+.env

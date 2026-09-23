@@ -1,0 +1,13 @@
+# Local secrets / config — copy .env.example to .env instead
+.env
+
+# Build output
+/bin/
+/server
+*.exe
+
+# Editor / OS clutter
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
