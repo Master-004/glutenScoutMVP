@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/Master-004/glutenscout/internal/models"
 	"github.com/Master-004/glutenscout/internal/store"
@@ -74,6 +75,49 @@ func (h *Handler) restaurants(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.render(w, r, http.StatusOK, "home", data)
+}
+
+// restaurantPage is the data for the restaurant detail page.
+type restaurantPage struct {
+	Restaurant models.RestaurantDetail
+	Meals      []models.Meal
+}
+
+// restaurant shows one restaurant and its GF meals: GET /restaurants/{id}.
+func (h *Handler) restaurant(w http.ResponseWriter, r *http.Request) {
+	id, ok := parseID(r.PathValue("id"))
+	if !ok {
+		// "/restaurants/abc" isn't a real page, so treat it as not found.
+		h.notFound(w, r)
+		return
+	}
+
+	rest, err := h.store.GetRestaurant(r.Context(), id)
+	if errors.Is(err, store.ErrNotFound) {
+		h.notFound(w, r)
+		return
+	}
+	if err != nil {
+		h.serverError(w, r, err)
+		return
+	}
+
+	meals, err := h.store.ListMealsByRestaurant(r.Context(), id)
+	if err != nil {
+		h.serverError(w, r, err)
+		return
+	}
+	h.render(w, r, http.StatusOK, "restaurant", restaurantPage{Restaurant: rest, Meals: meals})
+}
+
+// parseID turns a URL path segment into a positive database id.
+// Anything else (letters, negatives, decimals, too big) is rejected.
+func parseID(s string) (int64, bool) {
+	id, err := strconv.ParseInt(s, 10, 64)
+	if err != nil || id <= 0 {
+		return 0, false
+	}
+	return id, true
 }
 
 // isFragmentRequest reports whether HTMX asked for just a page fragment.

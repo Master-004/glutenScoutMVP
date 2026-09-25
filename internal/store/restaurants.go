@@ -40,6 +40,29 @@ func (s *Store) GetCityBySlug(ctx context.Context, slug string) (models.City, er
 	return city, nil
 }
 
+// GetRestaurant returns one restaurant with its city's name and slug.
+// It returns ErrNotFound if no restaurant has that id.
+func (s *Store) GetRestaurant(ctx context.Context, id int64) (models.RestaurantDetail, error) {
+	const q = `
+		SELECT r.id, r.city_id, r.name, r.address, r.cuisine, r.description, r.created_at,
+		       c.name AS city_name, c.slug AS city_slug
+		FROM restaurants r
+		JOIN cities c ON c.id = r.city_id
+		WHERE r.id = $1`
+	rows, err := s.pool.Query(ctx, q, id)
+	if err != nil {
+		return models.RestaurantDetail{}, fmt.Errorf("get restaurant %d: %w", id, err)
+	}
+	r, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[models.RestaurantDetail])
+	if errors.Is(err, pgx.ErrNoRows) {
+		return models.RestaurantDetail{}, ErrNotFound
+	}
+	if err != nil {
+		return models.RestaurantDetail{}, fmt.Errorf("get restaurant %d: %w", id, err)
+	}
+	return r, nil
+}
+
 // ListRestaurantsByCity returns a city's restaurants sorted by name, each with
 // a count of its GF meals.
 func (s *Store) ListRestaurantsByCity(ctx context.Context, cityID int64) ([]models.RestaurantSummary, error) {

@@ -33,6 +33,14 @@ type RestaurantSummary struct {
 	MealCount  int `db:"meal_count"`
 }
 
+// RestaurantDetail is a restaurant plus its city's name and slug, used on the
+// restaurant page for the "Back to {City} restaurants" link.
+type RestaurantDetail struct {
+	Restaurant
+	CityName string `db:"city_name"`
+	CitySlug string `db:"city_slug"`
+}
+
 // Meal is a gluten-free dish a restaurant offers.
 type Meal struct {
 	ID           int64     `db:"id"`

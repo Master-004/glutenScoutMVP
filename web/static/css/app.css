@@ -206,6 +206,68 @@ h1 {
   border-radius: var(--radius);
 }
 
+/* ---------- Restaurant page ---------- */
+
+.back-link {
+  display: inline-block;
+  padding: 0.5rem 0; /* taller tap target */
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.back-link:hover,
+.back-link:focus-visible {
+  text-decoration: underline;
+}
+
+.restaurant-header {
+  margin-bottom: 1.5rem;
+}
+
+.restaurant-header p {
+  margin: 0.15rem 0;
+}
+
+.restaurant-header .cuisine {
+  font-weight: 600;
+}
+
+.restaurant-header .address {
+  color: var(--muted);
+}
+
+.restaurant-header .description {
+  margin-top: 0.75rem;
+}
+
+/* ---------- Meal cards ---------- */
+
+.meal-card {
+  padding: 0;
+  overflow: hidden; /* clips the photo to the card's rounded corners */
+}
+
+.meal-photo {
+  aspect-ratio: 4 / 3; /* fixed box: no layout jump while the photo loads */
+  background: var(--green-light);
+}
+
+.meal-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* fill the box without stretching */
+}
+
+.meal-body {
+  padding: 0.85rem 1rem 1rem;
+}
+
+.meal-body .description {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
 /* ---------- Footer ---------- */
 
 .site-footer {

@@ -1,0 +1,21 @@
+{{define "title"}}{{.Restaurant.Name}}{{end}}
+
+{{define "content"}}
+<a class="back-link" href="/restaurants?city={{.Restaurant.CitySlug}}">← Back to {{.Restaurant.CityName}} restaurants</a>
+
+<section class="restaurant-header">
+  <h1>{{.Restaurant.Name}}</h1>
+  <p class="cuisine">{{.Restaurant.Cuisine}}</p>
+  <p class="address">{{.Restaurant.Address}}</p>
+  {{if .Restaurant.Description}}<p class="description">{{.Restaurant.Description}}</p>{{end}}
+</section>
+
+<h2 class="results-heading">Gluten-free meals</h2>
+{{if .Meals}}
+<ul class="card-list meal-list">
+  {{range .Meals}}<li>{{template "meal_card" .}}</li>{{end}}
+</ul>
+{{else}}
+<p class="empty">No GF meals listed yet.</p>
+{{end}}
+{{end}}

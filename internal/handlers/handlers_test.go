@@ -22,7 +22,24 @@ type fakeStore struct {
 	pingErr     error
 	cities      []models.City
 	restaurants map[int64][]models.RestaurantSummary // keyed by city id
+	details     map[int64]models.RestaurantDetail    // keyed by restaurant id
+	meals       map[int64][]models.Meal              // keyed by restaurant id
 	err         error                                // if set, data methods fail with it
+}
+
+func (f *fakeStore) GetRestaurant(ctx context.Context, id int64) (models.RestaurantDetail, error) {
+	if f.err != nil {
+		return models.RestaurantDetail{}, f.err
+	}
+	r, ok := f.details[id]
+	if !ok {
+		return models.RestaurantDetail{}, store.ErrNotFound
+	}
+	return r, nil
+}
+
+func (f *fakeStore) ListMealsByRestaurant(ctx context.Context, restaurantID int64) ([]models.Meal, error) {
+	return f.meals[restaurantID], f.err
 }
 
 func (f *fakeStore) Ping(ctx context.Context) error { return f.pingErr }
@@ -48,9 +65,22 @@ func (f *fakeStore) ListRestaurantsByCity(ctx context.Context, cityID int64) ([]
 }
 
 // seededStore returns a fake with two cities: Provo (two restaurants) and
-// Emptyville (none).
+// Emptyville (none). Restaurant 10 has two meals (one without a photo);
+// restaurant 11 has no meals.
 func seededStore() *fakeStore {
+	pizza := models.Restaurant{ID: 10, CityID: 2, Name: "Canyon Hearth Pizza", Cuisine: "Pizza", Address: "410 Timber Lane", Description: "Wood-fired pizza."}
+	solo := models.Restaurant{ID: 11, CityID: 2, Name: "Solo Cafe", Cuisine: "Cafe", Address: "1 Main St"}
 	return &fakeStore{
+		details: map[int64]models.RestaurantDetail{
+			10: {Restaurant: pizza, CityName: "Provo", CitySlug: "provo-ut"},
+			11: {Restaurant: solo, CityName: "Provo", CitySlug: "provo-ut"},
+		},
+		meals: map[int64][]models.Meal{
+			10: {
+				{ID: 100, RestaurantID: 10, Name: "GF Margherita", Description: "Tomato and basil.", PhotoURL: "/static/images/meals/pizza.svg"},
+				{ID: 101, RestaurantID: 10, Name: "Harvest Salad", Description: "Greens and squash."},
+			},
+		},
 		cities: []models.City{
 			{ID: 1, Name: "Emptyville", State: "UT", Slug: "emptyville-ut"},
 			{ID: 2, Name: "Provo", State: "UT", Slug: "provo-ut"},

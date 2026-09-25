@@ -1,0 +1,21 @@
+{{/*
+  One meal: photo, name, description. Expects a models.Meal.
+
+  Image notes:
+    - loading="lazy": the browser only downloads photos as they scroll near,
+      which saves data on phones.
+    - width/height + the CSS aspect-ratio box reserve the space up front,
+      so text doesn't jump down when the image arrives.
+    - alt: screen readers (and broken images) show the meal name.
+*/}}
+{{define "meal_card"}}
+<article class="card meal-card">
+  <div class="meal-photo">
+    <img src="{{if .PhotoURL}}{{.PhotoURL}}{{else}}/static/images/meals/placeholder.svg{{end}}" alt="{{.Name}}" loading="lazy" width="400" height="300">
+  </div>
+  <div class="meal-body">
+    <h3>{{.Name}}</h3>
+    {{if .Description}}<p class="description">{{.Description}}</p>{{end}}
+  </div>
+</article>
+{{end}}
