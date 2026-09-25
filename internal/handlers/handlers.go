@@ -8,13 +8,14 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/Master-004/glutenscout/internal/models"
 )
 
 // Store is everything handlers need from the database. It's an interface
 // (rather than *store.Store) so tests can pass in a fake with canned data
-// and run without Postgres. Later slices add methods here.
+// and run without Postgres.
 type Store interface {
 	Ping(ctx context.Context) error
 
@@ -24,19 +25,38 @@ type Store interface {
 
 	GetRestaurant(ctx context.Context, id int64) (models.RestaurantDetail, error)
 	ListMealsByRestaurant(ctx context.Context, restaurantID int64) ([]models.Meal, error)
+
+	GetMeal(ctx context.Context, id int64) (models.MealDetail, error)
+	ListReviewsByMeal(ctx context.Context, mealID int64) ([]models.Review, error)
+	CreateReview(ctx context.Context, mealID int64, authorName, body string) (models.Review, error)
+	ToggleUpvote(ctx context.Context, mealID int64, visitorID string) (count int, upvoted bool, err error)
+	MealStats(ctx context.Context, mealIDs []int64, visitorID string) (map[int64]models.MealStats, error)
 }
+
+// Review rate limit: at most this many reviews per visitor per hour.
+const (
+	reviewLimit       = 5
+	reviewLimitWindow = time.Hour
+)
 
 // Handler holds shared dependencies for all HTTP handlers.
 type Handler struct {
-	store  Store
-	tmpl   *Templates
-	static fs.FS
-	log    *slog.Logger
+	store         Store
+	tmpl          *Templates
+	static        fs.FS
+	log           *slog.Logger
+	reviewLimiter *rateLimiter
 }
 
 // New creates a Handler. static is the file system served under /static/.
 func New(store Store, tmpl *Templates, static fs.FS, log *slog.Logger) *Handler {
-	return &Handler{store: store, tmpl: tmpl, static: static, log: log}
+	return &Handler{
+		store:         store,
+		tmpl:          tmpl,
+		static:        static,
+		log:           log,
+		reviewLimiter: newRateLimiter(reviewLimit, reviewLimitWindow),
+	}
 }
 
 // Routes registers every URL the app serves and returns the root handler.
@@ -51,11 +71,30 @@ func (h *Handler) Routes() http.Handler {
 	mux.HandleFunc("GET /{$}", h.home)
 	mux.HandleFunc("GET /restaurants", h.restaurants)
 	mux.HandleFunc("GET /restaurants/{id}", h.restaurant)
+	mux.HandleFunc("GET /meals/{id}", h.meal)
+	mux.HandleFunc("POST /meals/{id}/upvote", h.upvote)
+	mux.HandleFunc("POST /meals/{id}/reviews", h.createReview)
 
 	// Catch-all: anything not matched above gets the friendly 404 page.
 	mux.HandleFunc("/", h.notFound)
 
-	return h.recoverPanics(mux)
+	// Middleware wraps the router like layers of an onion; a request passes
+	// through them from the outside in:
+	//   recoverPanics -> cross-origin check -> visitor cookie -> routes
+	return h.recoverPanics(h.crossOriginProtection(withVisitor(mux)))
+}
+
+// crossOriginProtection blocks POSTs that come from other websites (CSRF).
+// Without it, a malicious page could make a visitor's browser submit reviews
+// or upvotes to GlutenScout. Go's built-in check uses the browser's
+// Sec-Fetch-Site and Origin headers. GET requests are always allowed.
+func (h *Handler) crossOriginProtection(next http.Handler) http.Handler {
+	cop := http.NewCrossOriginProtection()
+	cop.SetDenyHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h.log.Warn("blocked cross-origin request", "method", r.Method, "path", r.URL.Path, "origin", r.Header.Get("Origin"))
+		http.Error(w, "This request came from another website and was blocked.", http.StatusForbidden)
+	}))
+	return cop.Handler(next)
 }
 
 // noDirListing hides directory listings (e.g. /static/images/) by returning 404.

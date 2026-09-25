@@ -1,0 +1,20 @@
+{{define "title"}}{{.Meal.Name}} at {{.Meal.RestaurantName}}{{end}}
+
+{{define "content"}}
+<a class="back-link" href="/restaurants/{{.Meal.RestaurantID}}">← Back to {{.Meal.RestaurantName}}</a>
+
+<article class="card meal-detail">
+  {{template "meal_photo" .Meal.Meal}}
+  <div class="meal-body">
+    <h1>{{.Meal.Name}}</h1>
+    <p class="meal-restaurant">at <a href="/restaurants/{{.Meal.RestaurantID}}">{{.Meal.RestaurantName}}</a></p>
+    {{if .Meal.Description}}<p class="description">{{.Meal.Description}}</p>{{end}}
+    <div class="meal-actions">
+      {{template "upvote_button" .Upvote}}
+      <span class="hint">Tap if this meal was safe for you</span>
+    </div>
+  </div>
+</article>
+
+{{template "reviews_section" .Reviews}}
+{{end}}

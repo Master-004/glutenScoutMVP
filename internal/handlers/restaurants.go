@@ -80,7 +80,7 @@ func (h *Handler) restaurants(w http.ResponseWriter, r *http.Request) {
 // restaurantPage is the data for the restaurant detail page.
 type restaurantPage struct {
 	Restaurant models.RestaurantDetail
-	Meals      []models.Meal
+	Meals      []mealCard
 }
 
 // restaurant shows one restaurant and its GF meals: GET /restaurants/{id}.
@@ -107,7 +107,12 @@ func (h *Handler) restaurant(w http.ResponseWriter, r *http.Request) {
 		h.serverError(w, r, err)
 		return
 	}
-	h.render(w, r, http.StatusOK, "restaurant", restaurantPage{Restaurant: rest, Meals: meals})
+	cards, err := h.mealCards(r.Context(), meals, visitorID(r))
+	if err != nil {
+		h.serverError(w, r, err)
+		return
+	}
+	h.render(w, r, http.StatusOK, "restaurant", restaurantPage{Restaurant: rest, Meals: cards})
 }
 
 // parseID turns a URL path segment into a positive database id.

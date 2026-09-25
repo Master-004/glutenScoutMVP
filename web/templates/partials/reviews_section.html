@@ -1,0 +1,65 @@
+{{/*
+  reviews_section: the review form plus the list, newest first.
+  Expects a handlers.reviewsSection.
+
+  After every review POST, HTMX replaces this whole section with the
+  server's response. That one swap covers every case:
+    success  -> the form comes back empty and the new review is at the top
+    error    -> the form comes back with the message and the visitor's text
+*/}}
+{{define "reviews_section"}}
+<section id="reviews" class="reviews" aria-labelledby="reviews-heading">
+  <h2 id="reviews-heading">Reviews ({{len .Reviews}})</h2>
+
+  {{template "review_form" .Form}}
+
+  {{if .Reviews}}
+  <ol class="review-list">
+    {{range .Reviews}}
+    <li class="review">
+      <p class="review-meta">
+        <strong>{{.AuthorName}}</strong>
+        <time datetime="{{.CreatedAt.Format "2006-01-02T15:04:05Z07:00"}}">{{.CreatedAt.Format "Jan 2, 2006"}}</time>
+      </p>
+      {{/* Plain text: html/template escapes it, so "<script>" shows as text. */}}
+      <p class="review-body">{{.Body}}</p>
+    </li>
+    {{end}}
+  </ol>
+  {{else}}
+  <p class="empty">No reviews yet. Be the first to share how it went.</p>
+  {{end}}
+</section>
+{{end}}
+
+{{/*
+  review_form: expects a handlers.reviewForm.
+  novalidate: the server does the validation and shows friendly messages,
+  so the browser's own popups don't get in the way.
+*/}}
+{{define "review_form"}}
+<form class="review-form" method="post" action="/meals/{{.MealID}}/reviews" novalidate
+      hx-post="/meals/{{.MealID}}/reviews" hx-target="#reviews" hx-swap="outerHTML" hx-disabled-elt="find button">
+  {{if .Posted}}<p class="form-success" role="status">Thanks! Your review was posted.</p>{{end}}
+  {{if .FormErr}}<p class="form-error" role="alert">{{.FormErr}}</p>{{end}}
+
+  <div class="field">
+    <label for="author_name">Display name <span class="optional">(optional)</span></label>
+    <input id="author_name" name="author_name" type="text" maxlength="40" autocomplete="nickname"
+           placeholder="Anonymous" value="{{.Author}}"
+           {{if .AuthorErr}}aria-invalid="true" aria-describedby="author_name-error"{{end}}>
+    {{if .AuthorErr}}<p class="field-error" id="author_name-error" role="alert">{{.AuthorErr}}</p>{{end}}
+  </div>
+
+  <div class="field">
+    <label for="body">Your review</label>
+    <textarea id="body" name="body" rows="4" placeholder="Was it safe for you? Any tips for ordering?"
+              aria-describedby="body-hint{{if .BodyErr}} body-error{{end}}"
+              {{if .BodyErr}}aria-invalid="true"{{end}}>{{.Body}}</textarea>
+    <p class="hint" id="body-hint">Up to 1000 characters.</p>
+    {{if .BodyErr}}<p class="field-error" id="body-error" role="alert">{{.BodyErr}}</p>{{end}}
+  </div>
+
+  <button type="submit" class="button">Post review</button>
+</form>
+{{end}}

@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Master-004/glutenscout/internal/models"
 	"github.com/Master-004/glutenscout/internal/store"
@@ -24,7 +25,82 @@ type fakeStore struct {
 	restaurants map[int64][]models.RestaurantSummary // keyed by city id
 	details     map[int64]models.RestaurantDetail    // keyed by restaurant id
 	meals       map[int64][]models.Meal              // keyed by restaurant id
+	reviews     map[int64][]models.Review            // keyed by meal id, newest first
+	upvotes     map[int64]map[string]bool            // meal id -> visitor ids who upvoted
 	err         error                                // if set, data methods fail with it
+}
+
+func (f *fakeStore) GetMeal(ctx context.Context, id int64) (models.MealDetail, error) {
+	if f.err != nil {
+		return models.MealDetail{}, f.err
+	}
+	for restID, meals := range f.meals {
+		for _, m := range meals {
+			if m.ID == id {
+				return models.MealDetail{Meal: m, RestaurantName: f.details[restID].Name}, nil
+			}
+		}
+	}
+	return models.MealDetail{}, store.ErrNotFound
+}
+
+func (f *fakeStore) ListReviewsByMeal(ctx context.Context, mealID int64) ([]models.Review, error) {
+	return f.reviews[mealID], f.err
+}
+
+// CreateReview mimics the real store: it validates, then saves newest-first.
+func (f *fakeStore) CreateReview(ctx context.Context, mealID int64, author, body string) (models.Review, error) {
+	if f.err != nil {
+		return models.Review{}, f.err
+	}
+	author, body, err := store.NormalizeReview(author, body)
+	if err != nil {
+		return models.Review{}, err
+	}
+	if f.reviews == nil {
+		f.reviews = map[int64][]models.Review{}
+	}
+	r := models.Review{ID: int64(len(f.reviews[mealID]) + 1), MealID: mealID, AuthorName: author, Body: body, CreatedAt: time.Now()}
+	f.reviews[mealID] = append([]models.Review{r}, f.reviews[mealID]...)
+	return r, nil
+}
+
+func (f *fakeStore) ToggleUpvote(ctx context.Context, mealID int64, visitorID string) (int, bool, error) {
+	if f.err != nil {
+		return 0, false, f.err
+	}
+	if _, err := f.GetMeal(ctx, mealID); err != nil {
+		return 0, false, err
+	}
+	if f.upvotes == nil {
+		f.upvotes = map[int64]map[string]bool{}
+	}
+	if f.upvotes[mealID] == nil {
+		f.upvotes[mealID] = map[string]bool{}
+	}
+	voters := f.upvotes[mealID]
+	if voters[visitorID] {
+		delete(voters, visitorID)
+	} else {
+		voters[visitorID] = true
+	}
+	return len(voters), voters[visitorID], nil
+}
+
+func (f *fakeStore) MealStats(ctx context.Context, mealIDs []int64, visitorID string) (map[int64]models.MealStats, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	stats := map[int64]models.MealStats{}
+	for _, id := range mealIDs {
+		stats[id] = models.MealStats{
+			MealID:  id,
+			Upvotes: len(f.upvotes[id]),
+			Reviews: len(f.reviews[id]),
+			Upvoted: f.upvotes[id][visitorID],
+		}
+	}
+	return stats, nil
 }
 
 func (f *fakeStore) GetRestaurant(ctx context.Context, id int64) (models.RestaurantDetail, error) {

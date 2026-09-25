@@ -1,0 +1,21 @@
+{{/*
+  The upvote toggle. Expects a handlers.upvoteButton.
+
+  It's a real <form method="post">, so it works even without HTMX. With HTMX:
+    hx-post         = send the POST via HTMX instead of a page load
+    hx-target/swap  = replace this whole form with the server's new button
+    hx-disabled-elt = disable the button while the request is in flight,
+                      so a double-tap doesn't toggle twice
+  aria-pressed tells screen readers whether it's currently "on".
+*/}}
+{{define "upvote_button"}}
+<form class="upvote" method="post" action="/meals/{{.MealID}}/upvote"
+      hx-post="/meals/{{.MealID}}/upvote" hx-target="this" hx-swap="outerHTML" hx-disabled-elt="find button">
+  <button type="submit" class="upvote-btn{{if .Upvoted}} is-upvoted{{end}}" aria-pressed="{{.Upvoted}}"
+          title="{{if .Upvoted}}Remove your upvote{{else}}Upvote: this meal was safe for me{{end}}">
+    <span aria-hidden="true">▲</span>
+    <span class="upvote-count">{{.Count}}</span>
+    <span class="visually-hidden">{{if eq .Count 1}}upvote{{else}}upvotes{{end}}</span>
+  </button>
+</form>
+{{end}}

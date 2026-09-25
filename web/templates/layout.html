@@ -10,6 +10,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{template "title" .}} · GlutenScout</title>
   <link rel="stylesheet" href="/static/css/app.css">
+  <!--
+    HTMX config (a meta tag, not JavaScript). By default HTMX ignores 4xx
+    responses; these rules also swap 422 (form has errors) and 429 (rate
+    limited), so the form can show the server's message.
+  -->
+  <meta name="htmx-config" content='{"responseHandling":[{"code":"204","swap":false},{"code":"[23]..","swap":true},{"code":"422","swap":true},{"code":"429","swap":true},{"code":"[45]..","swap":false,"error":true},{"code":"...","swap":false}]}'>
   <!-- HTMX: lets hx-* attributes in our HTML fetch and swap page fragments. -->
   <script src="/static/js/htmx.min.js" defer></script>
 </head>

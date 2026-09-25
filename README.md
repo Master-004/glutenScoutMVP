@@ -60,7 +60,25 @@ web/static/       css, htmx, images (embedded in the binary)
 docs/             project guide and slice specs
 ```
 
-## Useful URLs
+## Pages and routes
 
-- `/` — home
-- `/healthz` — returns `ok` when the database is reachable
+| Route | What it does |
+|---|---|
+| `GET /` | Home: pick a city |
+| `GET /restaurants?city={slug}` | A city's restaurants (full page, or just the list for HTMX) |
+| `GET /restaurants/{id}` | A restaurant and its GF meals, with upvotes and review counts |
+| `GET /meals/{id}` | A meal: photo, upvote button, reviews, review form |
+| `POST /meals/{id}/upvote` | Toggle this visitor's upvote (returns the new button for HTMX) |
+| `POST /meals/{id}/reviews` | Post a review (returns the updated reviews section for HTMX) |
+| `GET /healthz` | Returns `ok` when the database is reachable |
+
+## How a few things work
+
+- **No accounts (yet).** Each browser gets a random anonymous visitor ID in an
+  `HttpOnly`, `SameSite=Lax` cookie. It allows one upvote per meal per visitor and
+  limits reviews to 5 per visitor per hour (in memory, so the limit resets on restart).
+- **HTMX, no custom JavaScript.** Interactivity is `hx-*` attributes in the templates.
+  Every form also works as a plain HTML form.
+- **Safety.** Review text is shown as plain text (`html/template` escapes it).
+  Cross-site POSTs are blocked with Go's `http.CrossOriginProtection`, and all SQL
+  uses query parameters.

@@ -50,3 +50,26 @@ type Meal struct {
 	PhotoURL     string    `db:"photo_url"` // empty means "show the placeholder image"
 	CreatedAt    time.Time `db:"created_at"`
 }
+
+// MealDetail is a meal plus its restaurant's name, for the meal page.
+type MealDetail struct {
+	Meal
+	RestaurantName string `db:"restaurant_name"`
+}
+
+// MealStats is the community activity on one meal, as seen by one visitor.
+type MealStats struct {
+	MealID  int64 `db:"meal_id"`
+	Upvotes int   `db:"upvotes"`
+	Reviews int   `db:"reviews"`
+	Upvoted bool  `db:"upvoted"` // has the current visitor upvoted this meal?
+}
+
+// Review is a community member's written review of a meal.
+type Review struct {
+	ID         int64     `db:"id"`
+	MealID     int64     `db:"meal_id"`
+	AuthorName string    `db:"author_name"`
+	Body       string    `db:"body"`
+	CreatedAt  time.Time `db:"created_at"`
+}
