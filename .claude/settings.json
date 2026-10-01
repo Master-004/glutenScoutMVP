@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s localhost:8080/)",
+      "Bash(curl -s \"localhost:8080/restaurants?city=provo\")",
+      "Bash(curl -s localhost:8080/restaurants/1)"
+    ]
+  }
+}

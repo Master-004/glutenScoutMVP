@@ -47,6 +47,18 @@ func (c *testClient) post(path string, form url.Values, hx bool) *httptest.Respo
 	return c.do(req)
 }
 
+// withChoices fills in a valid reviewer type and food rating unless the test
+// set its own, so tests about other fields don't have to repeat them.
+func withChoices(v url.Values) url.Values {
+	if !v.Has("reviewer_type") {
+		v.Set("reviewer_type", "celiac")
+	}
+	if !v.Has("rating") {
+		v.Set("rating", "5")
+	}
+	return v
+}
+
 // ---------- Visitor cookie ----------
 
 func TestVisitorCookieIsSetOnce(t *testing.T) {
@@ -82,7 +94,7 @@ func TestVisitorCookieTamperedIsReplaced(t *testing.T) {
 
 func TestMealPage(t *testing.T) {
 	c := newClient(t, newTestServer(t, seededStore()))
-	c.post("/meals/100/reviews", url.Values{"author_name": {"Jo"}, "body": {"Safe and delicious"}}, true)
+	c.post("/meals/100/reviews", withChoices(url.Values{"author_name": {"Jo"}, "body": {"Safe and delicious"}}), true)
 
 	rec := c.get("/meals/100")
 	if rec.Code != http.StatusOK {
@@ -187,9 +199,9 @@ func TestUpvoteUnknownMeal(t *testing.T) {
 func TestCreateReviewSuccess(t *testing.T) {
 	st := seededStore()
 	c := newClient(t, newTestServer(t, st))
-	c.post("/meals/100/reviews", url.Values{"body": {"Older review"}}, true)
+	c.post("/meals/100/reviews", withChoices(url.Values{"body": {"Older review"}}), true)
 
-	rec := c.post("/meals/100/reviews", url.Values{"author_name": {"  Sam "}, "body": {"Newest review"}}, true)
+	rec := c.post("/meals/100/reviews", withChoices(url.Values{"author_name": {"  Sam "}, "body": {"Newest review"}}), true)
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200", rec.Code)
 	}
@@ -212,6 +224,41 @@ func TestCreateReviewSuccess(t *testing.T) {
 	if st.reviews[100][0].AuthorName != "Sam" || st.reviews[100][1].AuthorName != "Anonymous" {
 		t.Errorf("authors = %q, %q", st.reviews[100][0].AuthorName, st.reviews[100][1].AuthorName)
 	}
+	// The whole section comes back, including a fresh (closed) sheet: that's
+	// what closes the popup. No retarget headers on success.
+	if !strings.Contains(body, `id="review-sheet" class="sheet" popover`) || rec.Header().Get("HX-Retarget") != "" {
+		t.Error("success should return the section with a fresh sheet and no retarget")
+	}
+}
+
+func TestReviewFormIsInASheet(t *testing.T) {
+	body := newClient(t, newTestServer(t, seededStore())).get("/meals/100").Body.String()
+	for _, want := range []string{
+		`popovertarget="review-sheet">Write a review</button>`,
+		`id="review-sheet" class="sheet" popover`,
+		`popovertargetaction="hide"`, // the ✕ close button
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("meal page missing %q", want)
+		}
+	}
+	// The reviews list follows the heading, not a tall form: the sheet (and
+	// its form) is the only place the form appears.
+	if strings.Count(body, `id="review-form"`) != 1 {
+		t.Error("review form should appear exactly once, inside the sheet")
+	}
+}
+
+func TestReviewErrorsSwapOnlyTheFormWithHTMX(t *testing.T) {
+	c := newClient(t, newTestServer(t, seededStore()))
+	rec := c.post("/meals/100/reviews", withChoices(url.Values{"body": {""}}), true)
+	if rec.Header().Get("HX-Retarget") != "#review-form" || rec.Header().Get("HX-Reswap") != "outerHTML" {
+		t.Errorf("headers = %q / %q, want #review-form / outerHTML", rec.Header().Get("HX-Retarget"), rec.Header().Get("HX-Reswap"))
+	}
+	body := rec.Body.String()
+	if !strings.HasPrefix(strings.TrimSpace(body), `<form id="review-form"`) || strings.Contains(body, `id="reviews"`) {
+		t.Error("an HTMX error response should be just the form, so the sheet stays open")
+	}
 }
 
 func TestCreateReviewValidationErrorsKeepInput(t *testing.T) {
@@ -226,7 +273,7 @@ func TestCreateReviewValidationErrorsKeepInput(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			st := seededStore()
 			c := newClient(t, newTestServer(t, st))
-			rec := c.post("/meals/100/reviews", url.Values{"author_name": {tt.author}, "body": {tt.body}}, true)
+			rec := c.post("/meals/100/reviews", withChoices(url.Values{"author_name": {tt.author}, "body": {tt.body}}), true)
 
 			if rec.Code != http.StatusUnprocessableEntity {
 				t.Errorf("status = %d, want 422", rec.Code)
@@ -245,24 +292,75 @@ func TestCreateReviewValidationErrorsKeepInput(t *testing.T) {
 	}
 }
 
+func TestCreateReviewReviewerTypeAndRating(t *testing.T) {
+	t.Run("both required for diners, choices kept on error", func(t *testing.T) {
+		st := seededStore()
+		c := newClient(t, newTestServer(t, st))
+		rec := c.post("/meals/100/reviews", url.Values{"body": {"Tasty"}, "rating": {"4"}}, true)
+		body := rec.Body.String()
+		if rec.Code != http.StatusUnprocessableEntity || !strings.Contains(body, "Please choose which describes you.") {
+			t.Errorf("missing reviewer type: got %d", rec.Code)
+		}
+		if !strings.Contains(body, `value="4" checked`) {
+			t.Error("chosen rating should stay selected after an error")
+		}
+
+		rec = c.post("/meals/100/reviews", url.Values{"body": {"Tasty"}, "reviewer_type": {"strict"}, "rating": {"9"}}, true)
+		body = rec.Body.String()
+		if rec.Code != http.StatusUnprocessableEntity || !strings.Contains(body, "Please rate the food from 1 to 5 stars.") {
+			t.Errorf("bad rating: got %d", rec.Code)
+		}
+		if !strings.Contains(body, `value="strict" checked`) {
+			t.Error("chosen reviewer type should stay selected after an error")
+		}
+		if len(st.reviews[100]) != 0 {
+			t.Error("invalid review was saved")
+		}
+	})
+
+	t.Run("saved review shows tag and stars", func(t *testing.T) {
+		c := newClient(t, newTestServer(t, seededStore()))
+		body := c.post("/meals/100/reviews", url.Values{"body": {"Great"}, "reviewer_type": {"celiac"}, "rating": {"4"}}, true).Body.String()
+		for _, want := range []string{`class="reviewer-tag">Celiac<`, `aria-label="Food: 4 out of 5 stars"`} {
+			if !strings.Contains(body, want) {
+				t.Errorf("review missing %q", want)
+			}
+		}
+	})
+
+	t.Run("restaurant replies don't rate their own food", func(t *testing.T) {
+		st := seededStore()
+		c := newClient(t, newTestServer(t, st))
+		c.post("/meals/100/reviews", url.Values{"body": {"Our fryer is potatoes only."}, "reviewer_type": {"restaurant"}, "rating": {"5"}}, true)
+		if got := st.reviews[100]; len(got) != 1 || got[0].Rating != 0 || got[0].ReviewerType != "restaurant" {
+			t.Errorf("restaurant reply saved as %+v, want rating 0", got)
+		}
+	})
+}
+
 func TestCreateReviewWithoutHTMX(t *testing.T) {
 	c := newClient(t, newTestServer(t, seededStore()))
 
-	ok := c.post("/meals/100/reviews", url.Values{"body": {"Plain form post"}}, false)
+	ok := c.post("/meals/100/reviews", withChoices(url.Values{"body": {"Plain form post"}}), false)
 	if ok.Code != http.StatusSeeOther || ok.Header().Get("Location") != "/meals/100#reviews" {
 		t.Errorf("success: got %d to %q, want 303 to /meals/100#reviews", ok.Code, ok.Header().Get("Location"))
 	}
 
-	bad := c.post("/meals/100/reviews", url.Values{"body": {""}}, false)
+	bad := c.post("/meals/100/reviews", withChoices(url.Values{"body": {""}}), false)
 	if bad.Code != http.StatusUnprocessableEntity || !strings.Contains(bad.Body.String(), "<html") {
 		t.Errorf("error without HTMX should re-render the full page with 422, got %d", bad.Code)
+	}
+	// Without HTMX the page reloads with the sheet closed, so the form (and
+	// its error) must be shown on the page instead of inside the sheet.
+	if page := bad.Body.String(); strings.Contains(page, `id="review-sheet"`) || !strings.Contains(page, "Please write a review") {
+		t.Error("plain-post errors should show the form on the page, not in a closed sheet")
 	}
 }
 
 func TestCreateReviewEscapesHTML(t *testing.T) {
 	c := newClient(t, newTestServer(t, seededStore()))
 	attack := `<script>alert("xss")</script>`
-	c.post("/meals/100/reviews", url.Values{"author_name": {attack}, "body": {attack}}, true)
+	c.post("/meals/100/reviews", withChoices(url.Values{"author_name": {attack}, "body": {attack}}), true)
 
 	body := c.get("/meals/100").Body.String()
 	if strings.Contains(body, attack) {
@@ -280,11 +378,11 @@ func TestCreateReviewRateLimit(t *testing.T) {
 	c.get("/")
 
 	for i := 1; i <= reviewLimit; i++ {
-		if rec := c.post("/meals/100/reviews", url.Values{"body": {"ok"}}, true); rec.Code != http.StatusOK {
+		if rec := c.post("/meals/100/reviews", withChoices(url.Values{"body": {"ok"}}), true); rec.Code != http.StatusOK {
 			t.Fatalf("review %d: status = %d, want 200", i, rec.Code)
 		}
 	}
-	rec := c.post("/meals/100/reviews", url.Values{"body": {"one too many"}}, true)
+	rec := c.post("/meals/100/reviews", withChoices(url.Values{"body": {"one too many"}}), true)
 	if rec.Code != http.StatusTooManyRequests {
 		t.Fatalf("status = %d, want 429", rec.Code)
 	}
@@ -297,14 +395,14 @@ func TestCreateReviewRateLimit(t *testing.T) {
 
 	// A different visitor is unaffected.
 	other := newClient(t, h)
-	if rec := other.post("/meals/100/reviews", url.Values{"body": {"hi"}}, true); rec.Code != http.StatusOK {
+	if rec := other.post("/meals/100/reviews", withChoices(url.Values{"body": {"hi"}}), true); rec.Code != http.StatusOK {
 		t.Errorf("other visitor: status = %d, want 200", rec.Code)
 	}
 }
 
 func TestCreateReviewUnknownMeal(t *testing.T) {
 	c := newClient(t, newTestServer(t, seededStore()))
-	if rec := c.post("/meals/999/reviews", url.Values{"body": {"hi"}}, true); rec.Code != http.StatusNotFound {
+	if rec := c.post("/meals/999/reviews", withChoices(url.Values{"body": {"hi"}}), true); rec.Code != http.StatusNotFound {
 		t.Errorf("status = %d, want 404", rec.Code)
 	}
 }
@@ -351,7 +449,7 @@ func TestRestaurantPageShowsMealStats(t *testing.T) {
 	c := newClient(t, h)
 	c.get("/")
 	c.post("/meals/100/upvote", nil, true)
-	c.post("/meals/100/reviews", url.Values{"body": {"great"}}, true)
+	c.post("/meals/100/reviews", withChoices(url.Values{"body": {"great"}}), true)
 
 	body := c.get("/restaurants/10").Body.String()
 	for _, want := range []string{

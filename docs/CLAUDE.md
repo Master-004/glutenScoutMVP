@@ -52,5 +52,13 @@ glutenscout/
 - Sample data uses **fictional** restaurants. Never claim a real restaurant is gluten-free.
 - Every page footer shows this disclaimer: *"GlutenScout info comes from the community and may be out of date. Always confirm with the restaurant before ordering."*
 
+## Added after the 4 slices (follow docs/DESIGN.md)
+- **Safety profile** on the restaurant page: "Last verified" date, precaution badges (confirmed / conflict / unverified), restaurant-answers date, conflict note in words, and a call-ahead script with the restaurant's phone. All of it comes from **seed data** (`safety_profiles`, `precautions`) for now.
+- **Reviews** require a reviewer type (Celiac / Strict GF / Gluten-sensitive / Restaurant) and a 1–5 **food** rating (restaurants don't rate their own food). Average ratings show on restaurant rows, restaurant pages, meal cards and meal pages.
+- **Theme switch** (Auto / Light / Dark) saved in a cookie.
+- **Meal gluten status** (`meals.gf_status`: `gf` / `cross_contact` / `contains`, plus `gf_note`). The restaurant page groups meals: GF options, then cross-contact risk, then "Contains gluten" folded in a `<details>`. "N GF meals" counts only `gf`. Non-GF meals are in the seed on purpose, to test whether diners can find the GF options.
+- **Sheets**: "Call ahead" and "Write a review" open bottom sheets built on the HTML `popover` attribute (no JavaScript). Review errors with HTMX swap only the form (`HX-Retarget`) so the sheet stays open.
+- **Green button**: "Write a review" on the meal page. List and restaurant pages have no green page button (the cards are the main action).
+
 ## NOT in the MVP (don't build these yet)
-User accounts/login, verified users, photo uploads, sorting and filters (distance, best reviews, most options, type, reliability), allergen charts, other allergens (dairy, nuts, etc.), GF safety Q&A (cross-contamination, fryers), substitution info, community events, payments, a Swift/iOS app, and outside restaurant APIs (Google Places, Foursquare, etc.).
+User accounts/login, verified users, photo uploads, sorting and filters (distance, best reviews, most options, type, reliability), allergen charts, other allergens (dairy, nuts, etc.), user-submitted precaution reports (the safety profile is seed data only and is not computed from reviews yet), peer review actions (Helpful / Matches my visit / Report conflict), substitution info, community events, payments, a Swift/iOS app, and outside restaurant APIs (Google Places, Foursquare, etc.).

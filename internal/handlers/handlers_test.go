@@ -24,6 +24,7 @@ type fakeStore struct {
 	cities      []models.City
 	restaurants map[int64][]models.RestaurantSummary // keyed by city id
 	details     map[int64]models.RestaurantDetail    // keyed by restaurant id
+	safety      map[int64]models.SafetyProfile       // keyed by restaurant id
 	meals       map[int64][]models.Meal              // keyed by restaurant id
 	reviews     map[int64][]models.Review            // keyed by meal id, newest first
 	upvotes     map[int64]map[string]bool            // meal id -> visitor ids who upvoted
@@ -49,18 +50,21 @@ func (f *fakeStore) ListReviewsByMeal(ctx context.Context, mealID int64) ([]mode
 }
 
 // CreateReview mimics the real store: it validates, then saves newest-first.
-func (f *fakeStore) CreateReview(ctx context.Context, mealID int64, author, body string) (models.Review, error) {
+func (f *fakeStore) CreateReview(ctx context.Context, mealID int64, in store.ReviewInput) (models.Review, error) {
 	if f.err != nil {
 		return models.Review{}, f.err
 	}
-	author, body, err := store.NormalizeReview(author, body)
+	in, err := store.NormalizeReview(in)
 	if err != nil {
 		return models.Review{}, err
 	}
 	if f.reviews == nil {
 		f.reviews = map[int64][]models.Review{}
 	}
-	r := models.Review{ID: int64(len(f.reviews[mealID]) + 1), MealID: mealID, AuthorName: author, Body: body, CreatedAt: time.Now()}
+	r := models.Review{
+		ID: int64(len(f.reviews[mealID]) + 1), MealID: mealID, AuthorName: in.Author, Body: in.Body,
+		ReviewerType: in.ReviewerType, Rating: in.Rating, CreatedAt: time.Now(),
+	}
 	f.reviews[mealID] = append([]models.Review{r}, f.reviews[mealID]...)
 	return r, nil
 }
@@ -93,8 +97,20 @@ func (f *fakeStore) MealStats(ctx context.Context, mealIDs []int64, visitorID st
 	}
 	stats := map[int64]models.MealStats{}
 	for _, id := range mealIDs {
+		var rating models.Rating
+		sum := 0
+		for _, r := range f.reviews[id] {
+			if r.Rating > 0 {
+				sum += r.Rating
+				rating.RatingCount++
+			}
+		}
+		if rating.RatingCount > 0 {
+			rating.AvgRating = float64(sum) / float64(rating.RatingCount)
+		}
 		stats[id] = models.MealStats{
 			MealID:  id,
+			Rating:  rating,
 			Upvotes: len(f.upvotes[id]),
 			Reviews: len(f.reviews[id]),
 			Upvoted: f.upvotes[id][visitorID],
@@ -112,6 +128,10 @@ func (f *fakeStore) GetRestaurant(ctx context.Context, id int64) (models.Restaur
 		return models.RestaurantDetail{}, store.ErrNotFound
 	}
 	return r, nil
+}
+
+func (f *fakeStore) GetSafetyProfile(ctx context.Context, restaurantID int64) (models.SafetyProfile, error) {
+	return f.safety[restaurantID], f.err // missing key = zero profile, like the real store
 }
 
 func (f *fakeStore) ListMealsByRestaurant(ctx context.Context, restaurantID int64) ([]models.Meal, error) {
@@ -141,15 +161,30 @@ func (f *fakeStore) ListRestaurantsByCity(ctx context.Context, cityID int64) ([]
 }
 
 // seededStore returns a fake with two cities: Provo (two restaurants) and
-// Emptyville (none). Restaurant 10 has two meals (one without a photo);
-// restaurant 11 has no meals.
+// Emptyville (none). Restaurant 10 has two meals (one without a photo) and a
+// safety profile with a conflict; restaurant 11 has no meals, no profile and
+// no phone.
 func seededStore() *fakeStore {
-	pizza := models.Restaurant{ID: 10, CityID: 2, Name: "Canyon Hearth Pizza", Cuisine: "Pizza", Address: "410 Timber Lane", Description: "Wood-fired pizza."}
+	pizza := models.Restaurant{ID: 10, CityID: 2, Name: "Canyon Hearth Pizza", Cuisine: "Pizza", Address: "410 Timber Lane", Description: "Wood-fired pizza.", Phone: "(801) 555-0101"}
 	solo := models.Restaurant{ID: 11, CityID: 2, Name: "Solo Cafe", Cuisine: "Cafe", Address: "1 Main St"}
+	answered := time.Date(2026, 8, 30, 0, 0, 0, 0, time.UTC)
 	return &fakeStore{
 		details: map[int64]models.RestaurantDetail{
-			10: {Restaurant: pizza, CityName: "Provo", CitySlug: "provo-ut"},
+			10: {Restaurant: pizza, CityName: "Provo", CitySlug: "provo-ut", Rating: models.Rating{AvgRating: 4.3, RatingCount: 3}},
 			11: {Restaurant: solo, CityName: "Provo", CitySlug: "provo-ut"},
+		},
+		safety: map[int64]models.SafetyProfile{
+			10: {
+				Found:            true,
+				VerifiedOn:       time.Date(2026, 9, 12, 0, 0, 0, 0, time.UTC),
+				AnswersUpdatedOn: &answered,
+				ConflictNote:     "2 reports disagree about the oven.",
+				Precautions: []models.Precaution{
+					{Label: "Separate prep area", Status: models.EvidenceConfirmed},
+					{Label: "Shared oven?", Status: models.EvidenceConflict},
+					{Label: "GF hoisin on request", Status: models.EvidenceUnverified},
+				},
+			},
 		},
 		meals: map[int64][]models.Meal{
 			10: {

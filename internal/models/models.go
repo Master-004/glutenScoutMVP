@@ -23,31 +23,78 @@ type Restaurant struct {
 	Address     string    `db:"address"`
 	Cuisine     string    `db:"cuisine"`
 	Description string    `db:"description"`
+	Phone       string    `db:"phone"` // for the call-ahead script; "" if unknown
 	CreatedAt   time.Time `db:"created_at"`
 }
 
-// RestaurantSummary is a restaurant plus how many GF meals it lists,
-// used for the cards on the city results list.
-type RestaurantSummary struct {
-	Restaurant     // embedded: its fields are scanned as if declared here
-	MealCount  int `db:"meal_count"`
+// Rating is the average food rating (1–5 stars) across reviews that gave one.
+// Stars are for food and experience only, never gluten safety.
+type Rating struct {
+	AvgRating   float64 `db:"avg_rating"`   // 0 when nobody has rated yet
+	RatingCount int     `db:"rating_count"` // how many reviews gave a rating
 }
 
-// RestaurantDetail is a restaurant plus its city's name and slug, used on the
-// restaurant page for the "Back to {City} restaurants" link.
+// RestaurantSummary is a restaurant plus how many GF meals it lists, its food
+// rating, and when its safety profile was last verified (nil = no profile),
+// used for the rows on the city results list.
+type RestaurantSummary struct {
+	Restaurant            // embedded: its fields are scanned as if declared here
+	Rating                // embedded too: avg_rating, rating_count
+	MealCount  int        `db:"meal_count"`
+	VerifiedOn *time.Time `db:"verified_on"` // a pointer so a missing profile (NULL) scans as nil
+}
+
+// RestaurantDetail is a restaurant plus its city's name and slug (for the
+// "Back to {City} restaurants" link) and its food rating.
 type RestaurantDetail struct {
 	Restaurant
+	Rating
 	CityName string `db:"city_name"`
 	CitySlug string `db:"city_slug"`
 }
 
-// Meal is a gluten-free dish a restaurant offers.
+// Precaution evidence states. They match the CHECK constraint in the database.
+const (
+	EvidenceConfirmed  = "confirmed"  // restaurant and recent reviewers agree
+	EvidenceConflict   = "conflict"   // reports disagree
+	EvidenceUnverified = "unverified" // restaurant-only or out of date
+)
+
+// Precaution is one kitchen practice and how sure we are about it,
+// shown as a PrecautionBadge.
+type Precaution struct {
+	Label  string `db:"label"`  // names a practice, e.g. "Separate prep area"
+	Status string `db:"status"` // one of the Evidence* constants
+}
+
+// SafetyProfile is the dated summary at the top of a restaurant page.
+// A zero SafetyProfile (Found == false) means we have no information yet.
+type SafetyProfile struct {
+	Found            bool
+	VerifiedOn       time.Time
+	AnswersUpdatedOn *time.Time // when the restaurant last answered; nil = never
+	ConflictNote     string     // disagreement in words; "" = none
+	Precautions      []Precaution
+}
+
+// Meal gluten statuses. They match the CHECK constraint in the database.
+const (
+	GFOption     = "gf"            // made without gluten
+	CrossContact = "cross_contact" // no gluten ingredients, but shared equipment
+	ContainsGF   = "contains"      // contains gluten
+)
+
+// Meal is a dish a restaurant offers. GFStatus says whether it's a
+// gluten-free option; most listed meals are, but menus also have dishes
+// with gluten or a cross-contact risk.
 type Meal struct {
 	ID           int64     `db:"id"`
 	RestaurantID int64     `db:"restaurant_id"`
 	Name         string    `db:"name"`
 	Description  string    `db:"description"`
 	PhotoURL     string    `db:"photo_url"` // empty means "show the placeholder image"
+	GFStatus     string    `db:"gf_status"` // one of GFOption, CrossContact, ContainsGF
+	GFNote       string    `db:"gf_note"`   // why, in words; "" if nothing to add
 	CreatedAt    time.Time `db:"created_at"`
 }
 
@@ -60,16 +107,28 @@ type MealDetail struct {
 // MealStats is the community activity on one meal, as seen by one visitor.
 type MealStats struct {
 	MealID  int64 `db:"meal_id"`
+	Rating        // avg_rating, rating_count
 	Upvotes int   `db:"upvotes"`
 	Reviews int   `db:"reviews"`
 	Upvoted bool  `db:"upvoted"` // has the current visitor upvoted this meal?
 }
 
+// Reviewer types: who wrote a review. They match the CHECK constraint in the
+// database ("" is only for reviews posted before reviewer types existed).
+const (
+	ReviewerCeliac     = "celiac"
+	ReviewerStrict     = "strict"
+	ReviewerSensitive  = "sensitive"
+	ReviewerRestaurant = "restaurant"
+)
+
 // Review is a community member's written review of a meal.
 type Review struct {
-	ID         int64     `db:"id"`
-	MealID     int64     `db:"meal_id"`
-	AuthorName string    `db:"author_name"`
-	Body       string    `db:"body"`
-	CreatedAt  time.Time `db:"created_at"`
+	ID           int64     `db:"id"`
+	MealID       int64     `db:"meal_id"`
+	AuthorName   string    `db:"author_name"`
+	Body         string    `db:"body"`
+	ReviewerType string    `db:"reviewer_type"` // one of the Reviewer* constants
+	Rating       int       `db:"rating"`        // 1–5 food stars; 0 = none given
+	CreatedAt    time.Time `db:"created_at"`
 }

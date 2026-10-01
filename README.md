@@ -66,10 +66,11 @@ docs/             project guide and slice specs
 |---|---|
 | `GET /` | Home: pick a city |
 | `GET /restaurants?city={slug}` | A city's restaurants (full page, or just the list for HTMX) |
-| `GET /restaurants/{id}` | A restaurant and its GF meals, with upvotes and review counts |
+| `GET /restaurants/{id}` | A restaurant: food rating, safety profile (badges, last verified date), call-ahead script, and its GF meals |
 | `GET /meals/{id}` | A meal: photo, upvote button, reviews, review form |
 | `POST /meals/{id}/upvote` | Toggle this visitor's upvote (returns the new button for HTMX) |
 | `POST /meals/{id}/reviews` | Post a review (returns the updated reviews section for HTMX) |
+| `POST /theme` | Save Auto / Light / Dark in a cookie, then go back to the previous page |
 | `GET /healthz` | Returns `ok` when the database is reachable |
 
 ## How a few things work

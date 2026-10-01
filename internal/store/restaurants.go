@@ -40,15 +40,26 @@ func (s *Store) GetCityBySlug(ctx context.Context, slug string) (models.City, er
 	return city, nil
 }
 
-// GetRestaurant returns one restaurant with its city's name and slug.
+// ratingColumns computes a food rating from reviews joined as "rv". Reviews
+// with rating 0 (none given) are left out of both the average and the count.
+// COALESCE turns "no ratings at all" (NULL) into 0.
+const ratingColumns = `
+	COALESCE(AVG(rv.rating) FILTER (WHERE rv.rating > 0), 0)::float8 AS avg_rating,
+	COUNT(rv.id) FILTER (WHERE rv.rating > 0) AS rating_count`
+
+// GetRestaurant returns one restaurant with its city's name and slug, and its
+// food rating across all of its meals' reviews.
 // It returns ErrNotFound if no restaurant has that id.
 func (s *Store) GetRestaurant(ctx context.Context, id int64) (models.RestaurantDetail, error) {
-	const q = `
-		SELECT r.id, r.city_id, r.name, r.address, r.cuisine, r.description, r.created_at,
-		       c.name AS city_name, c.slug AS city_slug
+	q := `
+		SELECT r.id, r.city_id, r.name, r.address, r.cuisine, r.description, r.phone, r.created_at,
+		       c.name AS city_name, c.slug AS city_slug,` + ratingColumns + `
 		FROM restaurants r
 		JOIN cities c ON c.id = r.city_id
-		WHERE r.id = $1`
+		LEFT JOIN meals m ON m.restaurant_id = r.id
+		LEFT JOIN reviews rv ON rv.meal_id = m.id
+		WHERE r.id = $1
+		GROUP BY r.id, c.id`
 	rows, err := s.pool.Query(ctx, q, id)
 	if err != nil {
 		return models.RestaurantDetail{}, fmt.Errorf("get restaurant %d: %w", id, err)
@@ -64,17 +75,22 @@ func (s *Store) GetRestaurant(ctx context.Context, id int64) (models.RestaurantD
 }
 
 // ListRestaurantsByCity returns a city's restaurants sorted by name, each with
-// a count of its GF meals.
+// a count of its GF options (not meals with gluten or a cross-contact risk),
+// its food rating, and its last-verified date.
 func (s *Store) ListRestaurantsByCity(ctx context.Context, cityID int64) ([]models.RestaurantSummary, error) {
-	// LEFT JOIN (not JOIN) keeps restaurants with zero meals; COUNT(m.id)
-	// counts only matched meals, so those restaurants get 0 instead of 1.
-	const q = `
-		SELECT r.id, r.city_id, r.name, r.address, r.cuisine, r.description, r.created_at,
-		       COUNT(m.id) AS meal_count
+	// LEFT JOIN (not JOIN) keeps restaurants with zero meals, reviews or
+	// safety profile. Joining reviews repeats each meal once per review, so
+	// meals are counted with DISTINCT.
+	q := `
+		SELECT r.id, r.city_id, r.name, r.address, r.cuisine, r.description, r.phone, r.created_at,
+		       COUNT(DISTINCT m.id) FILTER (WHERE m.gf_status = 'gf') AS meal_count,
+		       sp.verified_on,` + ratingColumns + `
 		FROM restaurants r
 		LEFT JOIN meals m ON m.restaurant_id = r.id
+		LEFT JOIN reviews rv ON rv.meal_id = m.id
+		LEFT JOIN safety_profiles sp ON sp.restaurant_id = r.id
 		WHERE r.city_id = $1
-		GROUP BY r.id
+		GROUP BY r.id, sp.verified_on
 		ORDER BY r.name, r.id`
 	rows, err := s.pool.Query(ctx, q, cityID)
 	if err != nil {
@@ -85,4 +101,35 @@ func (s *Store) ListRestaurantsByCity(ctx context.Context, cityID int64) ([]mode
 		return nil, fmt.Errorf("list restaurants for city %d: %w", cityID, err)
 	}
 	return list, nil
+}
+
+// GetSafetyProfile returns a restaurant's safety profile and its precaution
+// badges in display order. A restaurant without a profile gets a zero
+// SafetyProfile (Found == false), not an error: "no information yet" is a
+// normal state the page shows.
+func (s *Store) GetSafetyProfile(ctx context.Context, restaurantID int64) (models.SafetyProfile, error) {
+	p := models.SafetyProfile{}
+	err := s.pool.QueryRow(ctx, `
+		SELECT verified_on, answers_updated_on, conflict_note
+		FROM safety_profiles WHERE restaurant_id = $1`, restaurantID).
+		Scan(&p.VerifiedOn, &p.AnswersUpdatedOn, &p.ConflictNote)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return models.SafetyProfile{}, nil
+	}
+	if err != nil {
+		return models.SafetyProfile{}, fmt.Errorf("get safety profile %d: %w", restaurantID, err)
+	}
+	p.Found = true
+
+	rows, err := s.pool.Query(ctx, `
+		SELECT label, status FROM precautions
+		WHERE restaurant_id = $1
+		ORDER BY position, id`, restaurantID)
+	if err != nil {
+		return models.SafetyProfile{}, fmt.Errorf("list precautions %d: %w", restaurantID, err)
+	}
+	if p.Precautions, err = pgx.CollectRows(rows, pgx.RowToStructByName[models.Precaution]); err != nil {
+		return models.SafetyProfile{}, fmt.Errorf("list precautions %d: %w", restaurantID, err)
+	}
+	return p, nil
 }

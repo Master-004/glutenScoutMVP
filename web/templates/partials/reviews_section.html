@@ -1,28 +1,60 @@
 {{/*
-  reviews_section: the review form plus the list, newest first.
+  reviews_section: a "Write a review" button, then the list, newest first.
   Expects a handlers.reviewsSection.
 
-  After every review POST, HTMX replaces this whole section with the
-  server's response. That one swap covers every case:
-    success  -> the form comes back empty and the new review is at the top
-    error    -> the form comes back with the message and the visitor's text
+  The form lives in a popup sheet (the HTML popover attribute: the browser
+  opens/closes it, no JavaScript needed), so the reviews come right after
+  the heading instead of below a tall form.
+
+  After a review POST (see respondReviewForm in meals.go):
+    success -> HTMX replaces this whole section: the new review is at the
+               top, and the open sheet is replaced by a fresh closed one
+    error   -> HTMX replaces only the form, so the sheet stays open
 */}}
 {{define "reviews_section"}}
 <section id="reviews" class="reviews" aria-labelledby="reviews-heading">
-  <h2 id="reviews-heading">Reviews ({{len .Reviews}})</h2>
+  <div class="section-head">
+    <h2 id="reviews-heading" class="section-header">Reviews ({{len .Reviews}})</h2>
+    {{/* The meal page's one green (primary) button. */}}
+    <button type="button" class="button" popovertarget="review-sheet">Write a review</button>
+  </div>
 
-  {{template "review_form" .Form}}
+  {{/* Icon + words + color: status is never shown by color alone. */}}
+  {{if .Form.Posted}}<p class="form-success" role="status"><span aria-hidden="true">✓</span> Thanks! Your review was posted.</p>{{end}}
+
+  {{if .Form.HasErrors}}
+    {{/* Only reached by a plain (non-HTMX) form post with errors: a closed
+         sheet would hide the messages, so show the form on the page. */}}
+    {{template "review_form" .Form}}
+  {{else}}
+  <div id="review-sheet" class="sheet" popover role="dialog" aria-labelledby="review-sheet-title">
+    <div class="sheet-head">
+      <h2 id="review-sheet-title" class="section-header">Write a review</h2>
+      <button type="button" class="sheet-close" popovertarget="review-sheet" popovertargetaction="hide" aria-label="Close">✕</button>
+    </div>
+    {{template "review_form" .Form}}
+  </div>
+  {{end}}
 
   {{if .Reviews}}
   <ol class="review-list">
     {{range .Reviews}}
     <li class="review">
-      <p class="review-meta">
-        <strong>{{.AuthorName}}</strong>
-        <time datetime="{{.CreatedAt.Format "2006-01-02T15:04:05Z07:00"}}">{{.CreatedAt.Format "Jan 2, 2006"}}</time>
-      </p>
-      {{/* Plain text: html/template escapes it, so "<script>" shows as text. */}}
-      <p class="review-body">{{.Body}}</p>
+      {{/* Monogram avatar. aria-hidden: the name right beside it already says who. */}}
+      <span class="avatar" aria-hidden="true">{{initial .AuthorName}}</span>
+      <div class="review-main">
+        <p class="review-meta">
+          <strong class="reviewer-name">{{.AuthorName}}</strong>
+          {{/* Design rule: every report shows its reviewer type. */}}
+          {{with reviewerLabel .ReviewerType}}<span class="reviewer-tag">{{.}}</span>{{end}}
+        </p>
+        <p class="review-sub">
+          {{if .Rating}}<span class="stars" role="img" aria-label="Food: {{.Rating}} out of 5 stars">{{range stars .Rating}}<span class="star star-{{.}}"></span>{{end}}</span>{{end}}
+          <time datetime="{{.CreatedAt.Format "2006-01-02T15:04:05Z07:00"}}">{{.CreatedAt.Format "Jan 2, 2006"}}</time>
+        </p>
+        {{/* Plain text: html/template escapes it, so "<script>" shows as text. */}}
+        <p class="review-body">{{.Body}}</p>
+      </div>
     </li>
     {{end}}
   </ol>
@@ -38,10 +70,9 @@
   so the browser's own popups don't get in the way.
 */}}
 {{define "review_form"}}
-<form class="review-form" method="post" action="/meals/{{.MealID}}/reviews" novalidate
-      hx-post="/meals/{{.MealID}}/reviews" hx-target="#reviews" hx-swap="outerHTML" hx-disabled-elt="find button">
-  {{if .Posted}}<p class="form-success" role="status">Thanks! Your review was posted.</p>{{end}}
-  {{if .FormErr}}<p class="form-error" role="alert">{{.FormErr}}</p>{{end}}
+<form id="review-form" class="review-form" method="post" action="/meals/{{.MealID}}/reviews" novalidate
+      hx-post="/meals/{{.MealID}}/reviews" hx-target="#reviews" hx-swap="outerHTML" hx-disabled-elt="find button[type=submit]">
+  {{if .FormErr}}<p class="form-error" role="alert"><span aria-hidden="true">!</span> {{.FormErr}}</p>{{end}}
 
   <div class="field">
     <label for="author_name">Display name <span class="optional">(optional)</span></label>
@@ -51,9 +82,37 @@
     {{if .AuthorErr}}<p class="field-error" id="author_name-error" role="alert">{{.AuthorErr}}</p>{{end}}
   </div>
 
+  {{/*
+    Radio groups in a <fieldset>: the <legend> is read as the question for
+    every option. The radios are visually styled as chips (see app.css), but
+    they're real inputs, so keyboard and screen readers work as usual.
+  */}}
+  <fieldset class="field choice-group" {{if .ReviewerTypeErr}}aria-describedby="reviewer_type-error"{{end}}>
+    <legend>Which describes you?</legend>
+    <div class="chips">
+      {{range .ReviewerChoices}}
+      <input type="radio" id="reviewer_type-{{.Value}}" name="reviewer_type" value="{{.Value}}" {{if eq $.ReviewerType .Value}}checked{{end}}>
+      <label for="reviewer_type-{{.Value}}">{{.Label}}</label>
+      {{end}}
+    </div>
+    {{if .ReviewerTypeErr}}<p class="field-error" id="reviewer_type-error" role="alert">{{.ReviewerTypeErr}}</p>{{end}}
+  </fieldset>
+
+  <fieldset class="field choice-group" aria-describedby="rating-hint{{if .RatingErr}} rating-error{{end}}">
+    <legend>Food rating</legend>
+    <div class="chips">
+      {{range .RatingChoices}}
+      <input type="radio" id="rating-{{.}}" name="rating" value="{{.}}" {{if eq $.Rating .}}checked{{end}}>
+      <label for="rating-{{.}}"><span aria-hidden="true">★</span> {{.}}<span class="visually-hidden"> {{if eq . 1}}star{{else}}stars{{end}}</span></label>
+      {{end}}
+    </div>
+    <p class="hint" id="rating-hint">Rate the food, not gluten safety. Skip this if you work at the restaurant.</p>
+    {{if .RatingErr}}<p class="field-error" id="rating-error" role="alert">{{.RatingErr}}</p>{{end}}
+  </fieldset>
+
   <div class="field">
     <label for="body">Your review</label>
-    <textarea id="body" name="body" rows="4" placeholder="Was it safe for you? Any tips for ordering?"
+    <textarea id="body" name="body" rows="4" placeholder="How did it go? Any tips for ordering?"
               aria-describedby="body-hint{{if .BodyErr}} body-error{{end}}"
               {{if .BodyErr}}aria-invalid="true"{{end}}>{{.Body}}</textarea>
     <p class="hint" id="body-hint">Up to 1000 characters.</p>

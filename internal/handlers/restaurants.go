@@ -80,7 +80,55 @@ func (h *Handler) restaurants(w http.ResponseWriter, r *http.Request) {
 // restaurantPage is the data for the restaurant detail page.
 type restaurantPage struct {
 	Restaurant models.RestaurantDetail
-	Meals      []mealCard
+	Safety     models.SafetyProfile
+	// Meals grouped by gluten status, so GF options are listed first and
+	// meals with gluten never get mixed in with them.
+	GFMeals       []mealCard
+	CrossMeals    []mealCard // no gluten ingredients, but shared equipment
+	ContainsMeals []mealCard
+}
+
+// groupMeals splits meal cards by gluten status, keeping their order.
+// An unknown or empty status counts as a GF option (the database default).
+func groupMeals(cards []mealCard) (gf, cross, contains []mealCard) {
+	for _, c := range cards {
+		switch c.Meal.GFStatus {
+		case models.CrossContact:
+			cross = append(cross, c)
+		case models.ContainsGF:
+			contains = append(contains, c)
+		default:
+			gf = append(gf, c)
+		}
+	}
+	return gf, cross, contains
+}
+
+// NeedsCallAhead reports whether anything in the safety profile is
+// conflicting or unverified (or there's no profile at all). The design system
+// says to point diners to the call-ahead script whenever evidence is thin.
+func (p restaurantPage) NeedsCallAhead() bool {
+	if !p.Safety.Found || p.Safety.ConflictNote != "" {
+		return true
+	}
+	for _, pr := range p.Safety.Precautions {
+		if pr.Status != models.EvidenceConfirmed {
+			return true
+		}
+	}
+	return false
+}
+
+// ToConfirm lists the precautions to ask about when calling ahead: every
+// badge that isn't confirmed.
+func (p restaurantPage) ToConfirm() []models.Precaution {
+	var out []models.Precaution
+	for _, pr := range p.Safety.Precautions {
+		if pr.Status != models.EvidenceConfirmed {
+			out = append(out, pr)
+		}
+	}
+	return out
 }
 
 // restaurant shows one restaurant and its GF meals: GET /restaurants/{id}.
@@ -102,6 +150,11 @@ func (h *Handler) restaurant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	safety, err := h.store.GetSafetyProfile(r.Context(), id)
+	if err != nil {
+		h.serverError(w, r, err)
+		return
+	}
 	meals, err := h.store.ListMealsByRestaurant(r.Context(), id)
 	if err != nil {
 		h.serverError(w, r, err)
@@ -112,7 +165,9 @@ func (h *Handler) restaurant(w http.ResponseWriter, r *http.Request) {
 		h.serverError(w, r, err)
 		return
 	}
-	h.render(w, r, http.StatusOK, "restaurant", restaurantPage{Restaurant: rest, Meals: cards})
+	page := restaurantPage{Restaurant: rest, Safety: safety}
+	page.GFMeals, page.CrossMeals, page.ContainsMeals = groupMeals(cards)
+	h.render(w, r, http.StatusOK, "restaurant", page)
 }
 
 // parseID turns a URL path segment into a positive database id.

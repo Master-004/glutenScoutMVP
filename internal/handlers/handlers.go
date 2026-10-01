@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Master-004/glutenscout/internal/models"
+	"github.com/Master-004/glutenscout/internal/store"
 )
 
 // Store is everything handlers need from the database. It's an interface
@@ -24,11 +25,12 @@ type Store interface {
 	ListRestaurantsByCity(ctx context.Context, cityID int64) ([]models.RestaurantSummary, error)
 
 	GetRestaurant(ctx context.Context, id int64) (models.RestaurantDetail, error)
+	GetSafetyProfile(ctx context.Context, restaurantID int64) (models.SafetyProfile, error)
 	ListMealsByRestaurant(ctx context.Context, restaurantID int64) ([]models.Meal, error)
 
 	GetMeal(ctx context.Context, id int64) (models.MealDetail, error)
 	ListReviewsByMeal(ctx context.Context, mealID int64) ([]models.Review, error)
-	CreateReview(ctx context.Context, mealID int64, authorName, body string) (models.Review, error)
+	CreateReview(ctx context.Context, mealID int64, in store.ReviewInput) (models.Review, error)
 	ToggleUpvote(ctx context.Context, mealID int64, visitorID string) (count int, upvoted bool, err error)
 	MealStats(ctx context.Context, mealIDs []int64, visitorID string) (map[int64]models.MealStats, error)
 }
@@ -74,6 +76,7 @@ func (h *Handler) Routes() http.Handler {
 	mux.HandleFunc("GET /meals/{id}", h.meal)
 	mux.HandleFunc("POST /meals/{id}/upvote", h.upvote)
 	mux.HandleFunc("POST /meals/{id}/reviews", h.createReview)
+	mux.HandleFunc("POST /theme", h.setTheme)
 
 	// Catch-all: anything not matched above gets the friendly 404 page.
 	mux.HandleFunc("/", h.notFound)

@@ -31,9 +31,9 @@ func TestNormalizeReview(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			author, body, err := NormalizeReview(tt.author, tt.body)
-			if author != tt.wantAuthor || body != tt.wantBody {
-				t.Errorf("got (%q, %q), want (%q, %q)", author, body, tt.wantAuthor, tt.wantBody)
+			got, err := NormalizeReview(review(tt.author, tt.body))
+			if got.Author != tt.wantAuthor || got.Body != tt.wantBody {
+				t.Errorf("got (%q, %q), want (%q, %q)", got.Author, got.Body, tt.wantAuthor, tt.wantBody)
 			}
 			var inputErr *ReviewInputError
 			if !tt.wantAuthorErr && !tt.wantBodyErr {
@@ -50,6 +50,47 @@ func TestNormalizeReview(t *testing.T) {
 			}
 			if (inputErr.Body != "") != tt.wantBodyErr {
 				t.Errorf("body error = %q, want error: %v", inputErr.Body, tt.wantBodyErr)
+			}
+		})
+	}
+}
+
+// review builds a valid ReviewInput (a celiac reviewer, 5 stars) so tests
+// about the name and body don't have to repeat the other fields.
+func review(author, body string) ReviewInput {
+	return ReviewInput{Author: author, Body: body, ReviewerType: "celiac", Rating: 5}
+}
+
+func TestNormalizeReviewTypeAndRating(t *testing.T) {
+	tests := []struct {
+		name          string
+		reviewerType  string
+		rating        int
+		wantRating    int
+		wantTypeErr   bool
+		wantRatingErr bool
+	}{
+		{"diner with rating", "strict", 4, 4, false, false},
+		{"missing type", "", 4, 4, true, false},
+		{"unknown type", "chef", 4, 4, true, false},
+		{"diner without rating", "celiac", 0, 0, false, true},
+		{"rating too high", "sensitive", 6, 6, false, true},
+		{"restaurant rating is dropped", "restaurant", 5, 0, false, false},
+		{"restaurant needs no rating", "restaurant", 0, 0, false, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := NormalizeReview(ReviewInput{Body: "ok", ReviewerType: tt.reviewerType, Rating: tt.rating})
+			if got.Rating != tt.wantRating {
+				t.Errorf("rating = %d, want %d", got.Rating, tt.wantRating)
+			}
+			var e *ReviewInputError
+			errors.As(err, &e)
+			if e == nil {
+				e = &ReviewInputError{}
+			}
+			if (e.ReviewerType != "") != tt.wantTypeErr || (e.Rating != "") != tt.wantRatingErr {
+				t.Errorf("errors = %+v, want type err %v, rating err %v", e, tt.wantTypeErr, tt.wantRatingErr)
 			}
 		})
 	}
@@ -85,11 +126,12 @@ func TestCreateReview(t *testing.T) {
 	meal := seedMeal(t, s)
 
 	t.Run("valid review is saved trimmed with default author", func(t *testing.T) {
-		r, err := s.CreateReview(ctx, meal, "  ", "  Safe for me!  ")
+		r, err := s.CreateReview(ctx, meal, review("  ", "  Safe for me!  "))
 		if err != nil {
 			t.Fatal(err)
 		}
-		if r.ID == 0 || r.MealID != meal || r.AuthorName != "Anonymous" || r.Body != "Safe for me!" || r.CreatedAt.IsZero() {
+		if r.ID == 0 || r.MealID != meal || r.AuthorName != "Anonymous" || r.Body != "Safe for me!" ||
+			r.ReviewerType != "celiac" || r.Rating != 5 || r.CreatedAt.IsZero() {
 			t.Errorf("got %+v", r)
 		}
 	})
@@ -97,13 +139,13 @@ func TestCreateReview(t *testing.T) {
 	t.Run("invalid input is rejected and not saved", func(t *testing.T) {
 		before, _ := s.ListReviewsByMeal(ctx, meal)
 		for _, body := range []string{"", "   ", strings.Repeat("x", 1001)} {
-			_, err := s.CreateReview(ctx, meal, "Sam", body)
+			_, err := s.CreateReview(ctx, meal, review("Sam", body))
 			var inputErr *ReviewInputError
 			if !errors.As(err, &inputErr) {
 				t.Errorf("body of %d chars: err = %v, want *ReviewInputError", len(body), err)
 			}
 		}
-		if _, err := s.CreateReview(ctx, meal, strings.Repeat("n", 41), "ok"); err == nil {
+		if _, err := s.CreateReview(ctx, meal, review(strings.Repeat("n", 41), "ok")); err == nil {
 			t.Error("41-char name should be rejected")
 		}
 		after, _ := s.ListReviewsByMeal(ctx, meal)
@@ -113,7 +155,7 @@ func TestCreateReview(t *testing.T) {
 	})
 
 	t.Run("unknown meal", func(t *testing.T) {
-		if _, err := s.CreateReview(ctx, meal+999, "Sam", "Hello"); !errors.Is(err, ErrNotFound) {
+		if _, err := s.CreateReview(ctx, meal+999, review("Sam", "Hello")); !errors.Is(err, ErrNotFound) {
 			t.Errorf("err = %v, want ErrNotFound", err)
 		}
 	})
@@ -124,7 +166,7 @@ func TestListReviewsByMealNewestFirst(t *testing.T) {
 	s := newTestStore(t)
 	meal := seedMeal(t, s)
 	for _, body := range []string{"first", "second", "third"} {
-		if _, err := s.CreateReview(ctx, meal, "Sam", body); err != nil {
+		if _, err := s.CreateReview(ctx, meal, review("Sam", body)); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -191,7 +233,15 @@ func TestMealStats(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if _, err := s.CreateReview(ctx, a, "", "yum"); err != nil {
+	if _, err := s.CreateReview(ctx, a, review("", "yum")); err != nil {
+		t.Fatal(err)
+	}
+	// A 4-star review, plus a restaurant reply that has no rating and must
+	// not drag the average down.
+	if _, err := s.CreateReview(ctx, a, ReviewInput{Body: "good", ReviewerType: "strict", Rating: 4}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.CreateReview(ctx, a, ReviewInput{Body: "thanks!", ReviewerType: "restaurant"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -199,8 +249,8 @@ func TestMealStats(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if st := stats[a]; st.Upvotes != 2 || st.Reviews != 1 || !st.Upvoted {
-		t.Errorf("meal A = %+v, want 2 upvotes, 1 review, upvoted by bob", st)
+	if st := stats[a]; st.Upvotes != 2 || st.Reviews != 3 || !st.Upvoted || st.AvgRating != 4.5 || st.RatingCount != 2 {
+		t.Errorf("meal A = %+v, want 2 upvotes, 3 reviews, upvoted by bob, 4.5 avg from 2 ratings", st)
 	}
 	if st := stats[b]; st.Upvotes != 0 || st.Reviews != 0 || st.Upvoted {
 		t.Errorf("meal B = %+v, want all zero", st)

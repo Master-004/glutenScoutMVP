@@ -19,12 +19,15 @@
   to tap).
 */}}
 {{define "meal_card"}}
-<article class="card meal-card">
+<article class="meal-card">
   <a class="meal-link" href="/meals/{{.Meal.ID}}">
     {{template "meal_photo" .Meal}}
     <div class="meal-body">
       <h3>{{.Meal.Name}}</h3>
+      <p class="card-rating">{{template "star_rating" .Rating}}</p>
+      <p class="card-badge">{{template "gf_badge" .Meal}}</p>
       {{if .Meal.Description}}<p class="description">{{.Meal.Description}}</p>{{end}}
+      {{if .Meal.GFNote}}<p class="gf-note">{{.Meal.GFNote}}</p>{{end}}
     </div>
   </a>
   <div class="meal-actions">

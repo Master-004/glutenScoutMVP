@@ -5,17 +5,54 @@
 
 <section class="restaurant-header">
   <h1>{{.Restaurant.Name}}</h1>
-  <p class="cuisine">{{.Restaurant.Cuisine}}</p>
-  <p class="address">{{.Restaurant.Address}}</p>
+  <p class="header-rating">{{template "star_rating" .Restaurant.Rating}}</p>
+  <p class="meta">{{.Restaurant.Cuisine}}</p>
+  <p class="meta">{{.Restaurant.Address}}</p>
   {{if .Restaurant.Description}}<p class="description">{{.Restaurant.Description}}</p>{{end}}
 </section>
 
-<h2 class="results-heading">Gluten-free meals</h2>
-{{if .Meals}}
-<ul class="card-list meal-list">
-  {{range .Meals}}<li>{{template "meal_card" .}}</li>{{end}}
-</ul>
-{{else}}
-<p class="empty">No GF meals listed yet.</p>
+{{/* Design system page order: header → safety profile → meals, with bands
+     (not bordered cards) between sections. The call-ahead script is a
+     sheet opened from the safety profile, so it doesn't take up the page. */}}
+<div class="band" role="presentation"></div>
+{{template "safety_profile" .}}
+{{template "call_ahead" .}}
+
+<div class="band" role="presentation"></div>
+
+{{/*
+  Meals grouped by gluten status. GF options come first; meals with a
+  cross-contact risk next, with a warning; meals with gluten last, folded
+  away in a <details> (a built-in show/hide, no JavaScript) so they don't
+  crowd out the GF options but are still there for anyone who looks.
+*/}}
+<section aria-labelledby="gf-heading">
+  <h2 id="gf-heading" class="section-header">Gluten-free options</h2>
+  {{if .GFMeals}}
+  <ul class="meal-grid">
+    {{range .GFMeals}}<li>{{template "meal_card" .}}</li>{{end}}
+  </ul>
+  {{else}}
+  <p class="empty">No GF meals listed yet.</p>
+  {{end}}
+</section>
+
+{{if .CrossMeals}}
+<section class="meal-group" aria-labelledby="cross-heading">
+  <h2 id="cross-heading" class="section-header">Cross-contact risk</h2>
+  <p class="group-note evidence-conflict">{{template "icon_conflict"}} Made without gluten ingredients, but prepared with shared equipment. Ask before ordering.</p>
+  <ul class="meal-grid">
+    {{range .CrossMeals}}<li>{{template "meal_card" .}}</li>{{end}}
+  </ul>
+</section>
+{{end}}
+
+{{if .ContainsMeals}}
+<details class="meal-group contains-group">
+  <summary class="section-header">Contains gluten ({{len .ContainsMeals}})</summary>
+  <ul class="meal-grid">
+    {{range .ContainsMeals}}<li>{{template "meal_card" .}}</li>{{end}}
+  </ul>
+</details>
 {{end}}
 {{end}}

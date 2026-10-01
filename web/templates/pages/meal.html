@@ -3,18 +3,24 @@
 {{define "content"}}
 <a class="back-link" href="/restaurants/{{.Meal.RestaurantID}}">← Back to {{.Meal.RestaurantName}}</a>
 
-<article class="card meal-detail">
+<article class="meal-detail">
   {{template "meal_photo" .Meal.Meal}}
   <div class="meal-body">
     <h1>{{.Meal.Name}}</h1>
-    <p class="meal-restaurant">at <a href="/restaurants/{{.Meal.RestaurantID}}">{{.Meal.RestaurantName}}</a></p>
+    <p class="header-rating">{{template "star_rating" .Rating}}</p>
+    <p class="meta">at <a href="/restaurants/{{.Meal.RestaurantID}}">{{.Meal.RestaurantName}}</a></p>
+    <p class="card-badge">{{template "gf_badge" .Meal.Meal}}</p>
     {{if .Meal.Description}}<p class="description">{{.Meal.Description}}</p>{{end}}
+    {{if .Meal.GFNote}}<p class="gf-note">{{.Meal.GFNote}}</p>{{end}}
     <div class="meal-actions">
       {{template "upvote_button" .Upvote}}
-      <span class="hint">Tap if this meal was safe for you</span>
+      {{/* Copy rule: never call a meal "safe". An upvote means it went well for one diner. */}}
+      <span class="hint">Upvote if you'd order this again</span>
     </div>
   </div>
 </article>
+
+<div class="band" role="presentation"></div>
 
 {{template "reviews_section" .Reviews}}
 {{end}}

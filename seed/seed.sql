@@ -85,8 +85,126 @@ INSERT INTO meals (id, restaurant_id, name, description, photo_url) VALUES
   (41, 12, 'Lamb Rogan Josh',          'Slow-braised lamb in an aromatic Kashmiri sauce.',                 '/static/images/meals/curry.svg')
 ON CONFLICT (id) DO NOTHING;
 
+-- Cluck Shack (Provo): a fictional fried-chicken counter. Most of its menu
+-- is breaded, which makes it a good test of whether diners can tell the GF
+-- options apart.
+INSERT INTO restaurants (id, city_id, name, address, cuisine, description, phone) VALUES
+  (13, 1, 'Cluck Shack', '1 Featherstone Way, Provo, UT', 'Fried chicken',
+   'Fried chicken counter. Most items are breaded; ask about the grilled options.', '(801) 555-0113')
+ON CONFLICT (id) DO NOTHING;
+
+-- Meals that are NOT gluten-free options, so the app shows the difference.
+--   contains      = contains gluten
+--   cross_contact = no gluten ingredients, but shared equipment
+INSERT INTO meals (id, restaurant_id, name, description, photo_url, gf_status, gf_note) VALUES
+  -- 13 Cluck Shack
+  (42, 13, 'Fried Chicken Sandwich',  'Buttermilk fried chicken, pickles, and slaw on a brioche bun.', '/static/images/meals/sandwich.svg', 'contains',      'Wheat-flour breading and a wheat bun.'),
+  (43, 13, 'Chicken Tenders',         'Hand-breaded tenders with honey mustard.',                      '/static/images/meals/chicken.svg',  'contains',      'Wheat-flour breading.'),
+  (44, 13, 'Mac and Cheese',          'Baked elbow macaroni with cheddar.',                            '/static/images/meals/pasta.svg',    'contains',      'Made with wheat pasta.'),
+  (45, 13, 'Seasoned Fries',          'Skin-on fries with house seasoning.',                           '/static/images/meals/fries.svg',    'cross_contact', 'Potatoes only, but fried in the same oil as the breaded chicken.'),
+  (46, 13, 'Grilled Chicken Salad',   'Grilled chicken, greens, tomato, and ranch.',                   '/static/images/meals/salad.svg',    'gf',            'Order without croutons; the ranch is made without wheat.'),
+  -- Other restaurants: their non-GF items
+  (47, 1,  'Garlic Knots',            'Knotted dough with garlic butter and parmesan.',                '',                                  'contains',      'Made with regular wheat dough.'),
+  (48, 3,  'Crispy Egg Rolls',        'Pork and cabbage egg rolls with sweet chili sauce.',            '',                                  'contains',      'Wheat wrappers.'),
+  (49, 4,  'Chips and Salsa',         'House corn chips with roasted salsa.',                          '/static/images/meals/taco.svg',     'cross_contact', 'Corn chips, but fried in a fryer shared with flour items.'),
+  (50, 4,  'Flour Tortilla Quesadilla','Melted cheese and chicken in a flour tortilla.',               '/static/images/meals/taco.svg',     'contains',      'Flour tortilla.'),
+  (51, 5,  'Beer-Battered Onion Rings','Thick-cut onion rings.',                                       '/static/images/meals/fries.svg',    'contains',      'Beer batter contains wheat and barley.'),
+  (52, 6,  'Fettuccine Alfredo',      'Fettuccine in a parmesan cream sauce.',                         '/static/images/meals/pasta.svg',    'contains',      'Regular wheat pasta. Ask for GF penne instead.'),
+  (53, 6,  'Garlic Bread',            'Toasted Italian bread with garlic butter.',                     '',                                  'contains',      'Wheat bread.'),
+  (54, 9,  'Onion Ring Tower',        'Stacked beer-battered onion rings.',                            '/static/images/meals/fries.svg',    'contains',      'Beer batter; fried in a separate fryer from the fries.'),
+  (55, 11, 'Cornbread',               'Sweet skillet cornbread with honey butter.',                    '/static/images/meals/breakfast.svg','contains',      'Made with wheat flour and cornmeal.'),
+  (56, 11, 'Fried Okra',              'Cornmeal-crusted okra.',                                        '/static/images/meals/fries.svg',    'cross_contact', 'Cornmeal breading, but fried with breaded items.'),
+  (57, 12, 'Garlic Naan',             'Tandoor-baked flatbread with garlic.',                          '',                                  'contains',      'Wheat flour.'),
+  (58, 12, 'Vegetable Pakoras',       'Spiced vegetable fritters.',                                    '/static/images/meals/curry.svg',    'cross_contact', 'Chickpea-flour batter, but fried in shared oil.')
+ON CONFLICT (id) DO NOTHING;
+
+-- Phone numbers for the call-ahead script. 555-0100 to 555-0199 are reserved
+-- for fiction, so these can never ring a real business.
+-- An UPDATE (not INSERT) because the restaurants already exist; "phone = ''"
+-- means re-running never overwrites a number someone changed.
+UPDATE restaurants SET phone = v.phone
+FROM (VALUES
+  (1,  '(801) 555-0101'), (2,  '(801) 555-0102'), (3,  '(801) 555-0103'), (4,  '(801) 555-0104'),
+  (5,  '(801) 555-0105'), (6,  '(801) 555-0106'), (7,  '(801) 555-0107'), (8,  '(801) 555-0108'),
+  (9,  '(801) 555-0109'), (11, '(303) 555-0111'), (12, '(303) 555-0112')
+) AS v(id, phone)
+WHERE restaurants.id = v.id AND restaurants.phone = '';
+
+-- Safety profiles. Mile Marker Tacos (10) deliberately has none, to show the
+-- "no safety information yet" state. Saltbox Thai (7) is out of date on purpose.
+INSERT INTO safety_profiles (restaurant_id, verified_on, answers_updated_on, conflict_note) VALUES
+  (1,  '2026-09-12', '2026-08-30', '2 reports disagree about whether GF pizzas bake in the same oven as regular pizzas.'),
+  (2,  '2026-09-20', '2026-09-01', ''),
+  (3,  '2026-07-02', '2026-06-15', 'Reports disagree about whether rice noodles are cooked in baskets also used for wheat noodles.'),
+  (4,  '2026-09-05', '2026-08-20', '2 reports disagree about whether tortilla chips share a fryer with flour items.'),
+  (5,  '2026-09-18', '2026-09-10', ''),
+  (6,  '2026-09-08', '2026-08-25', ''),
+  (7,  '2026-04-10', '2026-04-10', ''),
+  (8,  '2026-09-25', '2026-09-15', ''),
+  (9,  '2026-09-22', '2026-09-01', '1 report says GF buns were toasted on the shared grill; the restaurant says they use a separate pan.'),
+  (11, '2026-08-14', '2026-08-01', ''),
+  (12, '2026-09-02', '2026-08-18', 'Reports disagree about whether naan and tandoori dishes share the tandoor.'),
+  -- Cluck Shack: reviewers have visited, but the restaurant hasn't answered (NULL).
+  (13, '2026-09-15', NULL, '')
+ON CONFLICT (restaurant_id) DO NOTHING;
+
+-- Precaution badges. Labels name a practice, never a verdict; a "?" marks
+-- the open question when reports conflict.
+INSERT INTO precautions (restaurant_id, label, status, position) VALUES
+  (1,  'Separate prep area',            'confirmed',  1),
+  (1,  'Separate pizza trays',          'confirmed',  2),
+  (1,  'Gloves changed',                'confirmed',  3),
+  (1,  'Shared oven?',                  'conflict',   4),
+  (2,  'Separate prep area',            'confirmed',  1),
+  (2,  'Clean utensils',                'confirmed',  2),
+  (2,  'Dedicated toaster',             'unverified', 3),
+  (3,  'Rice noodles only',             'confirmed',  1),
+  (3,  'Shared noodle baskets?',        'conflict',   2),
+  (3,  'GF hoisin on request',          'unverified', 3),
+  (4,  'Corn tortillas made in house',  'confirmed',  1),
+  (4,  'Shared fryer?',                 'conflict',   2),
+  (5,  'Staff trained on GF orders',    'confirmed',  1),
+  (5,  'Gloves changed',                'confirmed',  2),
+  (5,  'Separate prep area',            'confirmed',  3),
+  (6,  'GF pasta in fresh water',       'confirmed',  1),
+  (6,  'Separate pots',                 'confirmed',  2),
+  (6,  'Separate colander',             'unverified', 3),
+  (7,  'GF tamari on request',          'unverified', 1),
+  (7,  'Clean wok between orders',      'unverified', 2),
+  (8,  'Dedicated GF baking batch',     'confirmed',  1),
+  (8,  'Dedicated toaster',             'confirmed',  2),
+  (8,  'Separate prep area',            'confirmed',  3),
+  (9,  'Dedicated fryer',               'confirmed',  1),
+  (9,  'GF buns stored separately',     'confirmed',  2),
+  (9,  'Shared grill?',                 'conflict',   3),
+  (11, 'Sauces made without wheat',     'confirmed',  1),
+  (11, 'Separate cutting boards',       'unverified', 2),
+  (12, 'No wheat thickeners',           'confirmed',  1),
+  (12, 'Shared tandoor?',               'conflict',   2),
+  (13, 'Dedicated fryer',               'unverified', 1),
+  (13, 'Separate prep area',            'unverified', 2)
+ON CONFLICT (restaurant_id, label) DO NOTHING;
+
+-- A few sample reviews so stars and reviewer tags have something to show.
+-- Ids start at 1001 so they never collide with reviews posted in the app.
+INSERT INTO reviews (id, meal_id, author_name, body, reviewer_type, rating, created_at) VALUES
+  (1001, 1,  'Maya R.',   'Told the server I''m celiac. The cook came out, changed gloves and used a separate tray. Crust was crisp and chewy.', 'celiac',     5, '2026-09-12 19:10:00+00'),
+  (1002, 1,  'Devon',     'Good pie. I asked about the oven and got two different answers from staff, so I''d call ahead.',                     'strict',     4, '2026-09-03 18:00:00+00'),
+  (1003, 2,  'Priya K.',  'Pepperoni was great. GF crust is a little dense but tasty.',                                                          'sensitive',  4, '2026-08-28 20:30:00+00'),
+  (1004, 3,  'Sam',       'Simple and fresh. They brought the dressing on the side when I asked.',                                               'celiac',     4, '2026-09-08 12:15:00+00'),
+  (1005, 8,  'Lin',       'Broth was rich. One server said the noodle baskets are shared; another said they have separate ones.',                'celiac',     3, '2026-07-02 13:00:00+00'),
+  (1006, 29, 'Jordan',    'Bun held together well. Staff knew exactly what I meant by cross-contact.',                                          'strict',     5, '2026-09-22 18:45:00+00'),
+  (1007, 31, 'Alex T.',   'Fries come from a fryer used only for potatoes. They confirmed it without me pushing.',                              'celiac',     5, '2026-09-20 19:30:00+00'),
+  (1008, 31, 'Beehive Burger Co.', 'Our fryer is used only for potatoes, and we filter the oil daily.',                                         'restaurant', 0, '2026-09-01 10:00:00+00'),
+  (1009, 25, 'Riley',     'Fluffy pancakes, and the toaster for GF bread is labeled.',                                                          'sensitive',  5, '2026-09-25 09:20:00+00'),
+  (1010, 39, 'Nadia',     'Delicious. I skipped the naan since they weren''t sure about the tandoor.',                                          'celiac',     4, '2026-09-02 19:00:00+00'),
+  (1011, 46, 'Chris B.',  'Grilled chicken was juicy. They left the croutons off without me asking twice.',                                     'strict',     4, '2026-09-15 12:30:00+00'),
+  (1012, 45, 'Morgan',    'Great fries, but the cashier confirmed they share oil with the breaded chicken, so I passed.',                       'celiac',     3, '2026-09-10 18:10:00+00')
+ON CONFLICT (id) DO NOTHING;
+
 -- Because we inserted explicit ids, move each id sequence past the highest id
 -- so future inserts (e.g. from the app) don't collide.
 SELECT setval(pg_get_serial_sequence('cities', 'id'),      (SELECT MAX(id) FROM cities));
 SELECT setval(pg_get_serial_sequence('restaurants', 'id'), (SELECT MAX(id) FROM restaurants));
 SELECT setval(pg_get_serial_sequence('meals', 'id'),       (SELECT MAX(id) FROM meals));
+SELECT setval(pg_get_serial_sequence('reviews', 'id'),     (SELECT MAX(id) FROM reviews));

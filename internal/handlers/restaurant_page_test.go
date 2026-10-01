@@ -3,8 +3,11 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/Master-004/glutenscout/internal/models"
 )
 
 func TestRestaurantPageFound(t *testing.T) {
@@ -27,6 +30,88 @@ func TestRestaurantPageFound(t *testing.T) {
 		if !strings.Contains(body, want) {
 			t.Errorf("restaurant page missing %q", want)
 		}
+	}
+}
+
+func TestRestaurantPageSafetyProfile(t *testing.T) {
+	body := get(t, newTestServer(t, seededStore()), "/restaurants/10").Body.String()
+	for _, want := range []string{
+		// Every safety claim has a date.
+		"Last verified Sep 12, 2026", "updated Aug 30, 2026",
+		// Badges carry icon + words + color: a class per state plus hidden words.
+		`class="badge badge-confirmed"`, "Confirmed: </span>Separate prep area",
+		`class="badge badge-conflict"`, "Reports disagree: </span>Shared oven?",
+		`class="badge badge-unverified"`, "Unverified: </span>GF hoisin on request",
+		// Conflicts in words.
+		"2 reports disagree about the oven.",
+		// The call-ahead script is a sheet opened by a button, with a nudge
+		// because something isn't confirmed.
+		`popovertarget="call-ahead">Call ahead</button>`, `id="call-ahead" class="sheet" popover`,
+		"Some details aren't confirmed.",
+		"Ask about shared oven, GF hoisin on request.",
+		`href="tel:+18015550101"`, "Call (801) 555-0101",
+		// Food rating, rounded to half stars, always with the count.
+		"4.5", "3 ratings",
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("restaurant page missing %q", want)
+		}
+	}
+	// Copy rule: never call anything "safe" ("Safety profile" is fine).
+	if regexp.MustCompile(`(?i)\bsafe\b`).MatchString(body) {
+		t.Error(`page copy should never say "safe"`)
+	}
+}
+
+func TestRestaurantPageGroupsMealsByGlutenStatus(t *testing.T) {
+	st := seededStore()
+	st.meals[10] = append(st.meals[10],
+		models.Meal{ID: 102, RestaurantID: 10, Name: "House Fries", GFStatus: models.CrossContact, GFNote: "Shared fryer."},
+		models.Meal{ID: 103, RestaurantID: 10, Name: "Garlic Knots", GFStatus: models.ContainsGF, GFNote: "Wheat dough."},
+	)
+	body := get(t, newTestServer(t, st), "/restaurants/10").Body.String()
+
+	gf := strings.Index(body, "Gluten-free options")
+	cross := strings.Index(body, "Cross-contact risk</h2>")
+	contains := strings.Index(body, "Contains gluten (1)")
+	if gf < 0 || cross < 0 || contains < 0 || !(gf < cross && cross < contains) {
+		t.Fatalf("want sections in order GF, cross-contact, contains; got %d, %d, %d", gf, cross, contains)
+	}
+	// Each meal lands in its own group.
+	if i := strings.Index(body, "GF Margherita"); i < gf || i > cross {
+		t.Error("GF Margherita should be in the GF section")
+	}
+	if i := strings.Index(body, "House Fries"); i < cross || i > contains {
+		t.Error("House Fries should be in the cross-contact section")
+	}
+	if i := strings.Index(body, "Garlic Knots"); i < contains {
+		t.Error("Garlic Knots should be in the contains-gluten section")
+	}
+	// Status in icon + words + color, plus the reason.
+	for _, want := range []string{
+		`class="badge badge-confirmed"`, "GF option",
+		`class="badge badge-conflict"`, `class="badge badge-contains"`, "Contains gluten",
+		"Shared fryer.", "Wheat dough.",
+		`<details class="meal-group contains-group">`, // folded away by default
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("restaurant page missing %q", want)
+		}
+	}
+}
+
+func TestRestaurantPageWithoutSafetyProfile(t *testing.T) {
+	body := get(t, newTestServer(t, seededStore()), "/restaurants/11").Body.String()
+	for _, want := range []string{
+		"No safety information yet", `popovertarget="call-ahead"`,
+		"We don't have a phone number for this restaurant yet.", "No ratings yet",
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("restaurant page missing %q", want)
+		}
+	}
+	if strings.Contains(body, "Last verified") {
+		t.Error("no profile means no verified date")
 	}
 }
 

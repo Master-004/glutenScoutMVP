@@ -1,14 +1,26 @@
 {{/*
   The shell every page shares. Each page file defines two blocks:
   "title" (browser tab text) and "content" (what goes inside <main>).
+  Expects a handlers.layoutData: .Theme for the header switch, and .Page,
+  the page's own data, which is passed on to those two blocks.
 */}}
 {{define "layout"}}<!doctype html>
-<html lang="en">
+{{/* data-theme is only set when the visitor picked one; otherwise the CSS
+     follows the device setting. */}}
+<html lang="en"{{if ne .Theme "system"}} data-theme="{{.Theme}}"{{end}}>
 <head>
   <meta charset="utf-8">
   <!-- Makes phones render at device width instead of a zoomed-out desktop view. -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{template "title" .}} · GlutenScout</title>
+  <!-- Tells the browser we support both themes, so form controls and
+       scrollbars match light/dark mode too. -->
+  <meta name="color-scheme" content="light dark">
+  <title>{{template "title" .Page}} · GlutenScout</title>
+  <!-- Open Sans is the design system's font. If it can't load, the CSS
+       falls back to the phone's system font. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap">
   <link rel="stylesheet" href="/static/css/app.css">
   <!--
     HTMX config (a meta tag, not JavaScript). By default HTMX ignores 4xx
@@ -22,10 +34,20 @@
 <body>
   <header class="site-header">
     <a href="/" class="brand">GlutenScout</a>
+    {{/*
+      Theme switch: a plain form, no JavaScript. Each button submits its own
+      value; the server saves it in a cookie and reloads this page.
+      aria-pressed marks the current choice for screen readers.
+    */}}
+    <form class="theme-switch" method="post" action="/theme" aria-label="Color theme">
+      <button type="submit" name="theme" value="system" aria-pressed="{{eq .Theme "system"}}">Auto</button>
+      <button type="submit" name="theme" value="light" aria-pressed="{{eq .Theme "light"}}">Light</button>
+      <button type="submit" name="theme" value="dark" aria-pressed="{{eq .Theme "dark"}}">Dark</button>
+    </form>
   </header>
 
   <main class="container">
-    {{template "content" .}}
+    {{template "content" .Page}}
   </main>
 
   <footer class="site-footer">

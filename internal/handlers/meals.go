@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/Master-004/glutenscout/internal/models"
 	"github.com/Master-004/glutenscout/internal/store"
@@ -26,19 +27,46 @@ type mealCard struct {
 	Meal        models.Meal
 	Upvote      upvoteButton
 	ReviewCount int
+	Rating      models.Rating
 }
 
 // reviewForm holds what the visitor typed plus any error messages, so a
-// failed submit can re-show the form with their text still in it.
+// failed submit can re-show the form with their choices still in it.
 type reviewForm struct {
-	MealID    int64
-	Author    string
-	Body      string
-	AuthorErr string
-	BodyErr   string
-	FormErr   string // problems not tied to one field (e.g. rate limit)
-	Posted    bool   // true right after a successful post: shows "Thanks!"
+	MealID          int64
+	Author          string
+	Body            string
+	ReviewerType    string
+	Rating          int
+	AuthorErr       string
+	BodyErr         string
+	ReviewerTypeErr string
+	RatingErr       string
+	FormErr         string // problems not tied to one field (e.g. rate limit)
+	Posted          bool   // true right after a successful post: shows "Thanks!"
 }
+
+// reviewerChoice is one option in the "Which describes you?" radio group.
+type reviewerChoice struct{ Value, Label string }
+
+// ReviewerChoices are the reviewer types the form offers, in display order.
+// A method (rather than a template literal) keeps the values in one place.
+func (reviewForm) ReviewerChoices() []reviewerChoice {
+	return []reviewerChoice{
+		{models.ReviewerCeliac, "Celiac"},
+		{models.ReviewerStrict, "Strict gluten-free"},
+		{models.ReviewerSensitive, "Gluten-sensitive"},
+		{models.ReviewerRestaurant, "I work at this restaurant"},
+	}
+}
+
+// HasErrors reports whether the form needs to be shown again with messages.
+func (f reviewForm) HasErrors() bool {
+	return f.AuthorErr != "" || f.BodyErr != "" || f.ReviewerTypeErr != "" || f.RatingErr != "" || f.FormErr != ""
+}
+
+// RatingChoices are the star values offered in the form, 1 to 5.
+func (reviewForm) RatingChoices() []int { return []int{1, 2, 3, 4, 5} }
 
 // reviewsSection is the data for the reviews_section partial: the form plus
 // the list. HTMX re-renders this whole section after each review POST.
@@ -52,6 +80,7 @@ type reviewsSection struct {
 type mealPage struct {
 	Meal    models.MealDetail
 	Upvote  upvoteButton
+	Rating  models.Rating
 	Reviews reviewsSection
 }
 
@@ -107,18 +136,26 @@ func (h *Handler) createReview(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "That review was too large to submit.", http.StatusRequestEntityTooLarge)
 		return
 	}
-	// Keep exactly what they typed, so an error doesn't wipe their text.
+	// A missing or non-numeric rating becomes 0, which validation rejects
+	// with a friendly message.
+	rating, _ := strconv.Atoi(r.PostForm.Get("rating"))
+	// Keep exactly what they entered, so an error doesn't wipe their text.
 	form := reviewForm{
-		MealID: meal.ID,
-		Author: r.PostForm.Get("author_name"),
-		Body:   r.PostForm.Get("body"),
+		MealID:       meal.ID,
+		Author:       r.PostForm.Get("author_name"),
+		Body:         r.PostForm.Get("body"),
+		ReviewerType: r.PostForm.Get("reviewer_type"),
+		Rating:       rating,
 	}
 
 	// Validate before rate limiting, so typos don't use up their 5 posts.
-	author, body, err := store.NormalizeReview(form.Author, form.Body)
+	in, err := store.NormalizeReview(store.ReviewInput{
+		Author: form.Author, Body: form.Body, ReviewerType: form.ReviewerType, Rating: form.Rating,
+	})
 	var inputErr *store.ReviewInputError
 	if errors.As(err, &inputErr) {
 		form.AuthorErr, form.BodyErr = inputErr.Author, inputErr.Body
+		form.ReviewerTypeErr, form.RatingErr = inputErr.ReviewerType, inputErr.Rating
 		// 422 = "we understood the request, but the data isn't valid".
 		h.respondReviewForm(w, r, meal, form, http.StatusUnprocessableEntity)
 		return
@@ -130,7 +167,7 @@ func (h *Handler) createReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := h.store.CreateReview(r.Context(), meal.ID, author, body); err != nil {
+	if _, err := h.store.CreateReview(r.Context(), meal.ID, in); err != nil {
 		if errors.Is(err, store.ErrNotFound) {
 			h.notFound(w, r)
 			return
@@ -147,9 +184,23 @@ func (h *Handler) createReview(w http.ResponseWriter, r *http.Request) {
 	h.respondReviewForm(w, r, meal, reviewForm{MealID: meal.ID, Posted: true}, http.StatusOK)
 }
 
-// respondReviewForm sends the reviews section with the given form state:
-// just the section for HTMX, or the whole meal page for plain form posts.
+// respondReviewForm sends the review form's result:
+//   - HTMX + errors: only the form, swapped in place. The form lives in a
+//     popup sheet, and swapping just the form keeps that sheet open so the
+//     visitor sees the messages next to what they typed.
+//   - HTMX + success: the whole reviews section. Replacing it also replaces
+//     the open sheet with a fresh, closed one, so the popup closes and the
+//     new review shows at the top of the list.
+//   - Plain form post: the whole meal page.
 func (h *Handler) respondReviewForm(w http.ResponseWriter, r *http.Request, meal models.MealDetail, form reviewForm, status int) {
+	if isFragmentRequest(r) && form.HasErrors() {
+		// HX-Retarget/HX-Reswap override the form's hx-target (the section)
+		// for this one response.
+		w.Header().Set("HX-Retarget", "#review-form")
+		w.Header().Set("HX-Reswap", "outerHTML")
+		h.renderPartial(w, r, status, "meal", "review_form", form)
+		return
+	}
 	if isFragmentRequest(r) {
 		section, err := h.reviewsSectionData(r.Context(), meal.ID, form)
 		if err != nil {
@@ -200,6 +251,7 @@ func (h *Handler) mealPageData(ctx context.Context, meal models.MealDetail, visi
 	return mealPage{
 		Meal:    meal,
 		Upvote:  upvoteButton{MealID: meal.ID, Count: st.Upvotes, Upvoted: st.Upvoted},
+		Rating:  st.Rating,
 		Reviews: section,
 	}, nil
 }
@@ -232,6 +284,7 @@ func (h *Handler) mealCards(ctx context.Context, meals []models.Meal, visitor st
 			Meal:        m,
 			Upvote:      upvoteButton{MealID: m.ID, Count: st.Upvotes, Upvoted: st.Upvoted},
 			ReviewCount: st.Reviews,
+			Rating:      st.Rating,
 		}
 	}
 	return cards, nil
