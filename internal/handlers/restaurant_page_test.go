@@ -112,8 +112,38 @@ func TestRestaurantPageWithoutSafetyProfile(t *testing.T) {
 			t.Errorf("restaurant page missing %q", want)
 		}
 	}
-	if strings.Contains(body, "Last verified") {
+	// (The info sheet mentions "Last verified" in general; look for a date.)
+	if regexp.MustCompile(`Last verified [A-Z][a-z]{2} \d`).MatchString(body) {
 		t.Error("no profile means no verified date")
+	}
+}
+
+// Tweak 3: the safety profile and stars are explained wherever they appear.
+func TestSafetyRatingIsExplained(t *testing.T) {
+	h := newTestServer(t, seededStore())
+
+	rest := get(t, h, "/restaurants/10").Body.String()
+	for _, want := range []string{
+		// One line under the heading, from how the profile is actually built.
+		"Based on how the kitchen handles prep, from the restaurant's answers and gluten-free diners' reports.",
+		// Info button opens a sheet describing each level.
+		`popovertarget="safety-info"`, `id="safety-info" class="sheet" popover`,
+		"The restaurant and recent gluten-free diners agree.",
+		"Reports conflict, or nobody has backed up the claim yet.",
+		"Only the restaurant has said so, or the information is out of date.",
+		// Stars are for food.
+		"Stars rate the food, not gluten safety.",
+	} {
+		if !strings.Contains(rest, want) {
+			t.Errorf("restaurant page missing %q", want)
+		}
+	}
+	// The explanation shows even with no profile yet.
+	if none := get(t, h, "/restaurants/11").Body.String(); !strings.Contains(none, `popovertarget="safety-info"`) {
+		t.Error("restaurants without a profile should still explain it")
+	}
+	if list := get(t, h, "/restaurants?city=provo-ut").Body.String(); !strings.Contains(list, `"Last verified" is when the kitchen`) {
+		t.Error("restaurant list should explain stars and Last verified")
 	}
 }
 

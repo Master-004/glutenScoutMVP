@@ -14,6 +14,7 @@
   <div class="meal-body">
     <h1>{{.Meal.Name}}</h1>
     <p class="header-rating">{{template "star_rating" .Rating}}</p>
+    {{if .Rating.RatingCount}}<p class="stars-note">Stars rate the food, not gluten safety.</p>{{end}}
     <p class="meta">at <a href="/restaurants/{{.Meal.RestaurantID}}">{{.Meal.RestaurantName}}</a></p>
     <p class="card-badge">{{template "gf_badge" .Meal.Meal}}</p>
     {{if .Meal.Description}}<p class="description">{{.Meal.Description}}</p>{{end}}

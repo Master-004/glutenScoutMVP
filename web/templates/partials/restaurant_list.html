@@ -13,6 +13,8 @@
 {{if .Restaurants}}
 {{/* The next step, in words, for first-time users. */}}
 <p class="next-step">Tap a restaurant to see its gluten-free meals.</p>
+{{/* What the stars and dates on each row mean (tweak 3). */}}
+<p class="list-legend">Stars rate the food. "Last verified" is when the kitchen's gluten-free practices were last checked.</p>
 <ul class="row-list">
   {{range .Restaurants}}
   <li>

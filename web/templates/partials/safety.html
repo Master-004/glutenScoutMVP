@@ -65,7 +65,13 @@
 */}}
 {{define "safety_profile"}}
 <section class="safety-profile" aria-labelledby="safety-heading">
-  <h2 id="safety-heading" class="section-header">Safety profile</h2>
+  <div class="profile-head">
+    <h2 id="safety-heading" class="section-header">Safety profile</h2>
+    {{/* Info button: opens a sheet explaining each level (popover, no JS). */}}
+    <button type="button" class="info-button" popovertarget="safety-info" aria-label="What the safety profile means">ⓘ</button>
+  </div>
+  {{/* What the profile is, in one line, so nobody has to guess. */}}
+  <p class="profile-explainer">Based on how the kitchen handles prep, from the restaurant's answers and gluten-free diners' reports.</p>
   {{with .Safety}}
   {{if .Found}}
     <p class="verified">{{template "icon_clock"}} Last verified {{date .VerifiedOn}}</p>
@@ -98,6 +104,31 @@
     {{if .NeedsCallAhead}}<span class="hint">Some details aren't confirmed. A quick call can help.</span>{{end}}
   </div>
 </section>
+{{template "safety_info"}}
+{{end}}
+
+{{/*
+  safety_info: a sheet explaining what the safety profile and each badge
+  level mean. Opened by the ⓘ button next to "Safety profile".
+*/}}
+{{define "safety_info"}}
+<div id="safety-info" class="sheet" popover role="dialog" aria-labelledby="safety-info-heading">
+  <div class="sheet-head">
+    <h2 id="safety-info-heading" class="section-header">About the safety profile</h2>
+    <button type="button" class="sheet-close" popovertarget="safety-info" popovertargetaction="hide" aria-label="Close">✕</button>
+  </div>
+  <p>Each badge names one kitchen practice, like a separate prep area, and shows how sure we are about it. It's evidence, not a guarantee: you decide.</p>
+  <dl class="levels">
+    <dt><span class="badge badge-confirmed">{{template "icon_check"}}Confirmed</span></dt>
+    <dd>The restaurant and recent gluten-free diners agree.</dd>
+    <dt><span class="badge badge-conflict">{{template "icon_conflict"}}Reports disagree</span></dt>
+    <dd>Reports conflict, or nobody has backed up the claim yet. Worth asking about.</dd>
+    <dt><span class="badge badge-unverified">{{template "icon_clock"}}Unverified</span></dt>
+    <dd>Only the restaurant has said so, or the information is out of date.</dd>
+  </dl>
+  <p><strong>Last verified</strong> is the date this information was last checked.</p>
+  <p><strong>Stars rate the food,</strong> not gluten safety. A tasty 5-star meal can still come from a shared fryer.</p>
+</div>
 {{end}}
 
 {{/*
