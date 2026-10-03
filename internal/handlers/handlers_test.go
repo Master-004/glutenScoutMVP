@@ -185,7 +185,7 @@ func (f *fakeStore) ListRestaurantsByCity(ctx context.Context, cityID int64, foo
 // safety profile with a conflict; restaurant 11 has no meals, no profile and
 // no phone.
 func seededStore() *fakeStore {
-	pizza := models.Restaurant{ID: 10, CityID: 2, Name: "Canyon Hearth Pizza", Cuisine: "Pizza", Address: "410 Timber Lane", Description: "Wood-fired pizza.", Phone: "(801) 555-0101"}
+	pizza := models.Restaurant{ID: 10, CityID: 2, Name: "Canyon Hearth Pizza", Cuisine: "Pizza", Address: "410 Timber Lane", Description: "Wood-fired pizza.", Phone: "(801) 555-0101", GoodForGroups: true}
 	solo := models.Restaurant{ID: 11, CityID: 2, Name: "Solo Cafe", Cuisine: "Cafe", Address: "1 Main St"}
 	answered := time.Date(2026, 8, 30, 0, 0, 0, 0, time.UTC)
 	return &fakeStore{
@@ -226,7 +226,7 @@ func seededStore() *fakeStore {
 		},
 		restaurants: map[int64][]models.RestaurantSummary{
 			2: {
-				{Restaurant: models.Restaurant{ID: 10, CityID: 2, Name: "Canyon Hearth Pizza", Cuisine: "Pizza", Address: "410 Timber Lane"}, MealCount: 3},
+				{Restaurant: models.Restaurant{ID: 10, CityID: 2, Name: "Canyon Hearth Pizza", Cuisine: "Pizza", Address: "410 Timber Lane", GoodForGroups: true}, MealCount: 3},
 				{Restaurant: models.Restaurant{ID: 11, CityID: 2, Name: "Solo Cafe", Cuisine: "Cafe", Address: "1 Main St"}, MealCount: 1},
 			},
 		},

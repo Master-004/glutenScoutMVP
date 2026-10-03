@@ -17,14 +17,16 @@ type City struct {
 
 // Restaurant is a place with gluten-free options.
 type Restaurant struct {
-	ID          int64     `db:"id"`
-	CityID      int64     `db:"city_id"`
-	Name        string    `db:"name"`
-	Address     string    `db:"address"`
-	Cuisine     string    `db:"cuisine"`
-	Description string    `db:"description"`
-	Phone       string    `db:"phone"` // for the call-ahead script; "" if unknown
-	CreatedAt   time.Time `db:"created_at"`
+	ID          int64  `db:"id"`
+	CityID      int64  `db:"city_id"`
+	Name        string `db:"name"`
+	Address     string `db:"address"`
+	Cuisine     string `db:"cuisine"`
+	Description string `db:"description"`
+	Phone       string `db:"phone"` // for the call-ahead script; "" if unknown
+	// GoodForGroups: plenty for people who aren't gluten-free too.
+	GoodForGroups bool      `db:"good_for_groups"`
+	CreatedAt     time.Time `db:"created_at"`
 }
 
 // Rating is the average food rating (1–5 stars) across reviews that gave one.

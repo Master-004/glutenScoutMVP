@@ -11,6 +11,12 @@
 {{define "icon_check"}}<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>{{end}}
 {{define "icon_conflict"}}<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.01"/></svg>{{end}}
 {{define "icon_clock"}}<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>{{end}}
+{{define "icon_group"}}<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15 14.5c3 0 5.5 2.2 5.5 5.5"/></svg>{{end}}
+
+{{/* groups_label: "Good for mixed groups", icon + words, neutral (not green:
+     it's about the menu, not gluten evidence). Expects a models.Restaurant. */}}
+{{define "groups_label"}}{{if .GoodForGroups}}<span class="groups-label">{{template "icon_group"}}Good for mixed groups</span>{{end}}{{end}}
+
 {{define "icon_x"}}<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>{{end}}
 
 {{/*

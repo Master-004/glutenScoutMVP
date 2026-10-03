@@ -29,7 +29,10 @@
       {{/* Every safety claim shows a date, so the list shows when each
            profile was last verified (or that there isn't one yet). */}}
       <p class="verified">{{template "icon_clock"}} {{if .VerifiedOn}}Last verified {{date .VerifiedOn}}{{else}}No safety information yet{{end}}</p>
-      <p class="chip">{{.MealCount}} GF {{if eq .MealCount 1}}meal{{else}}meals{{end}}</p>
+      <p class="row-labels">
+        <span class="chip">{{.MealCount}} GF {{if eq .MealCount 1}}meal{{else}}meals{{end}}</span>
+        {{template "groups_label" .Restaurant}}
+      </p>
       {{/* A visible "this opens" cue; the whole row is the link. */}}
       <span class="row-cta" aria-hidden="true">See meals ›</span>
     </a>

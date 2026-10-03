@@ -179,6 +179,11 @@ SELECT r.id, 'prep',
 FROM restaurants r
 ON CONFLICT (restaurant_id, kind, url) DO NOTHING;
 
+-- Good for mixed groups: restaurants with GF options AND a full menu for
+-- people who aren't gluten-free. (Re-running just sets the same flags.)
+UPDATE restaurants SET good_for_groups = true
+WHERE id IN (1, 4, 5, 6, 9, 11, 12, 13);
+
 -- Phone numbers for the call-ahead script. 555-0100 to 555-0199 are reserved
 -- for fiction, so these can never ring a real business.
 -- An UPDATE (not INSERT) because the restaurants already exist; "phone = ''"

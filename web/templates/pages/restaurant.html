@@ -13,6 +13,10 @@
   {{end}}
   <p class="meta">{{.Restaurant.Cuisine}}</p>
   <p class="meta">{{.Restaurant.Address}}</p>
+  {{if .Restaurant.GoodForGroups}}
+  <p class="groups-line">{{template "groups_label" .Restaurant.Restaurant}}
+    <span class="groups-hint">Plenty for people who aren't gluten-free too.</span></p>
+  {{end}}
   {{if .Restaurant.Description}}<p class="description">{{.Restaurant.Description}}</p>{{end}}
 </section>
 

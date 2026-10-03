@@ -53,7 +53,7 @@ const ratingColumns = `
 // It returns ErrNotFound if no restaurant has that id.
 func (s *Store) GetRestaurant(ctx context.Context, id int64) (models.RestaurantDetail, error) {
 	q := `
-		SELECT r.id, r.city_id, r.name, r.address, r.cuisine, r.description, r.phone, r.created_at,
+		SELECT r.id, r.city_id, r.name, r.address, r.cuisine, r.description, r.phone, r.good_for_groups, r.created_at,
 		       c.name AS city_name, c.slug AS city_slug,` + ratingColumns + `
 		FROM restaurants r
 		JOIN cities c ON c.id = r.city_id
@@ -86,7 +86,7 @@ func (s *Store) ListRestaurantsByCity(ctx context.Context, cityID int64, foodTyp
 	// safety profile. Joining reviews repeats each meal once per review, so
 	// meals are counted with DISTINCT.
 	q := `
-		SELECT r.id, r.city_id, r.name, r.address, r.cuisine, r.description, r.phone, r.created_at,
+		SELECT r.id, r.city_id, r.name, r.address, r.cuisine, r.description, r.phone, r.good_for_groups, r.created_at,
 		       COUNT(DISTINCT m.id) FILTER (WHERE m.gf_status = 'gf') AS meal_count,
 		       sp.verified_on,` + ratingColumns + `
 		FROM restaurants r

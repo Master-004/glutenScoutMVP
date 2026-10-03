@@ -498,6 +498,48 @@ p {
   color: var(--ink);
 }
 
+/* GF meal count + "Good for mixed groups", side by side. */
+.restaurant-row .row-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.restaurant-row .row-labels .chip {
+  margin-top: 0;
+}
+
+/* "Good for mixed groups": neutral chip with a people icon (not green,
+   which is reserved for gluten evidence). Words + icon carry the meaning. */
+.groups-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-pill);
+  background: var(--surface-raised);
+  color: var(--ink);
+  font-size: 13px; /* chip */
+  font-weight: 600;
+  line-height: 1;
+}
+
+.groups-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  margin: var(--space-2) 0 0;
+}
+
+.groups-hint {
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
 /* "See meals ›": shows the row opens something. The whole row is the link. */
 .row-cta {
   display: block;

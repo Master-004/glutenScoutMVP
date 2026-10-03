@@ -3,7 +3,37 @@ package handlers
 import (
 	"strings"
 	"testing"
+
+	"github.com/Master-004/glutenscout/internal/models"
 )
+
+// Tweak 6: "Good for mixed groups" on the list and the restaurant page.
+func TestGoodForMixedGroupsLabel(t *testing.T) {
+	h := newTestServer(t, seededStore())
+
+	list := get(t, h, "/restaurants?city=provo-ut").Body.String()
+	pizza := strings.Index(list, "Canyon Hearth Pizza")
+	solo := strings.Index(list, "Solo Cafe")
+	label := strings.Index(list, "Good for mixed groups")
+	// Exactly one label, on Canyon Hearth Pizza's row (before Solo Cafe's).
+	if strings.Count(list, "Good for mixed groups") != 1 || label < pizza || label > solo {
+		t.Error("only group-friendly restaurants should show the label, on their own row")
+	}
+
+	if rest := get(t, h, "/restaurants/10").Body.String(); !strings.Contains(rest, "Good for mixed groups") ||
+		!strings.Contains(rest, "Plenty for people who aren't gluten-free too.") {
+		t.Error("restaurant page should show the group label when true")
+	}
+	if rest := get(t, h, "/restaurants/11").Body.String(); strings.Contains(rest, "Good for mixed groups") {
+		t.Error("restaurant page shouldn't show the label when false")
+	}
+	// The section with options for people who aren't GF is still there.
+	st := seededStore()
+	st.meals[10] = append(st.meals[10], models.Meal{ID: 104, RestaurantID: 10, Name: "Garlic Knots", GFStatus: models.ContainsGF})
+	if rest := get(t, newTestServer(t, st), "/restaurants/10").Body.String(); !strings.Contains(rest, "Contains gluten (1)") {
+		t.Error("the contains-gluten section should still show")
+	}
+}
 
 // Tweak 5: food-type filter chips on the restaurant list and the meal list.
 
