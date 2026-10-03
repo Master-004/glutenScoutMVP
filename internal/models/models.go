@@ -98,10 +98,13 @@ type Meal struct {
 	CreatedAt    time.Time `db:"created_at"`
 }
 
-// MealDetail is a meal plus its restaurant's name, for the meal page.
+// MealDetail is a meal plus its restaurant's name and city, for the meal
+// page's links back to the restaurant and to the city's restaurant list.
 type MealDetail struct {
 	Meal
 	RestaurantName string `db:"restaurant_name"`
+	CityName       string `db:"city_name"`
+	CitySlug       string `db:"city_slug"`
 }
 
 // MealStats is the community activity on one meal, as seen by one visitor.

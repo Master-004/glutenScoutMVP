@@ -38,7 +38,8 @@ func (f *fakeStore) GetMeal(ctx context.Context, id int64) (models.MealDetail, e
 	for restID, meals := range f.meals {
 		for _, m := range meals {
 			if m.ID == id {
-				return models.MealDetail{Meal: m, RestaurantName: f.details[restID].Name}, nil
+				d := f.details[restID]
+				return models.MealDetail{Meal: m, RestaurantName: d.Name, CityName: d.CityName, CitySlug: d.CitySlug}, nil
 			}
 		}
 	}
@@ -274,8 +275,48 @@ func TestHomePage(t *testing.T) {
 		}
 	}
 	// No city picked yet, so no results should render.
-	if strings.Contains(body, "restaurant-card") {
+	if strings.Contains(body, "restaurant-row") {
 		t.Error("home page should start with an empty results area")
+	}
+}
+
+// Tweak 1: "Find restaurants" is the first screen's one obvious, green
+// action, and every screen points to its next step and a way back.
+func TestNextStepsAreObvious(t *testing.T) {
+	h := newTestServer(t, seededStore())
+
+	home := get(t, h, "/").Body.String()
+	if !strings.Contains(home, `<button class="button button-large" type="submit">Find restaurants</button>`) {
+		t.Error("home page needs a visible primary Find restaurants button")
+	}
+	if strings.Count(home, `class="button`) != 1 {
+		t.Error("home page should have exactly one primary button")
+	}
+	if !strings.Contains(home, `name="city" required`) {
+		t.Error("submitting without a city should ask for one")
+	}
+
+	list := get(t, h, "/restaurants?city=provo-ut").Body.String()
+	for _, want := range []string{"Tap a restaurant to see its gluten-free meals.", "See meals ›"} {
+		if !strings.Contains(list, want) {
+			t.Errorf("restaurant list missing %q", want)
+		}
+	}
+
+	rest := get(t, h, "/restaurants/10").Body.String()
+	if !strings.Contains(rest, "Tap a meal to see reviews") || !strings.Contains(rest, "Back to Provo restaurants") {
+		t.Error("restaurant page needs a next step and a way back to the list")
+	}
+
+	meal := get(t, h, "/meals/100").Body.String()
+	for _, want := range []string{
+		`href="/restaurants?city=provo-ut">← Provo restaurants</a>`, // back to the list
+		`href="/restaurants/10">Canyon Hearth Pizza</a>`,            // back to the restaurant
+		">Write a review</button>",                                  // the next step
+	} {
+		if !strings.Contains(meal, want) {
+			t.Errorf("meal page missing %q", want)
+		}
 	}
 }
 

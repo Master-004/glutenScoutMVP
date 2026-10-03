@@ -29,6 +29,7 @@
 <section aria-labelledby="gf-heading">
   <h2 id="gf-heading" class="section-header">Gluten-free options</h2>
   {{if .GFMeals}}
+  <p class="next-step">Tap a meal to see reviews, or write your own.</p>
   <ul class="meal-grid">
     {{range .GFMeals}}<li>{{template "meal_card" .}}</li>{{end}}
   </ul>

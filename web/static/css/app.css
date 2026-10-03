@@ -384,6 +384,38 @@ p {
   border-radius: var(--radius-md);
 }
 
+/* "Find restaurants": the first screen's primary action. Full width and
+   taller than other buttons so it's the obvious next step. */
+.button-large {
+  width: 100%;
+  min-height: 52px;
+  margin-top: var(--space-2);
+  font-size: 16px;
+}
+
+/* One line telling first-time users what to do next. */
+.next-step {
+  margin: calc(-1 * var(--space-2)) 0 var(--space-4);
+  color: var(--ink-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Breadcrumb on the meal page: back to the city list, or the restaurant. */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 var(--space-2);
+  color: var(--ink-secondary);
+  font-size: 13px;
+}
+
+.breadcrumb .back-link {
+  margin-bottom: 0;
+}
+
 /* ---------- Restaurant list (city results) ---------- */
 
 /* Rows separated by hairlines, not boxed cards. */
@@ -452,6 +484,19 @@ p {
 .restaurant-row .chip {
   margin-top: var(--space-2);
   color: var(--ink);
+}
+
+/* "See meals ›": shows the row opens something. The whole row is the link. */
+.row-cta {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--link);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.restaurant-row:hover .row-cta {
+  text-decoration: underline;
 }
 
 .empty {

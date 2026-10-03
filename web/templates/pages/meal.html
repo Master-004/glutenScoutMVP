@@ -1,7 +1,13 @@
 {{define "title"}}{{.Meal.Name}} at {{.Meal.RestaurantName}}{{end}}
 
 {{define "content"}}
-<a class="back-link" href="/restaurants/{{.Meal.RestaurantID}}">← Back to {{.Meal.RestaurantName}}</a>
+{{/* Breadcrumb: a clear way back to the restaurant and to the city's
+     restaurant list, from the deepest screen. */}}
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a class="back-link" href="/restaurants?city={{.Meal.CitySlug}}">← {{.Meal.CityName}} restaurants</a>
+  <span aria-hidden="true">/</span>
+  <a class="back-link" href="/restaurants/{{.Meal.RestaurantID}}">{{.Meal.RestaurantName}}</a>
+</nav>
 
 <article class="meal-detail">
   {{template "meal_photo" .Meal.Meal}}

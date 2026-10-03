@@ -7,30 +7,30 @@
 </section>
 
 {{/*
-  Progressive enhancement: the form works as a plain GET form (via the
-  <noscript> button) even without HTMX. With HTMX, changing the dropdown
-  fetches only the list fragment:
-    hx-get      = where to fetch from (the select's name/value is sent as ?city=...)
-    hx-trigger  = when to fetch (whenever the selection changes)
+  The first screen's one obvious next step: pick a city, tap "Find
+  restaurants" (the page's one green button). It's a plain GET form, so it
+  works without HTMX too. With HTMX, the form fetches only the list fragment:
+    hx-get      = where to fetch from (the form's fields are sent as ?city=...)
+    hx-trigger  = when: on submit (the button), and also as soon as the
+                  city changes, so people who just pick a city aren't stuck
     hx-target   = which element receives the response
     hx-push-url = update the address bar so the result can be shared/bookmarked
+  required: tapping the button before choosing a city asks for one instead
+  of sending an empty search.
   hx-history="false": on Back/Forward, HTMX re-fetches the page from the
   server instead of restoring its saved HTML snapshot. The snapshot can't
   remember the dropdown's current choice, so it would show the wrong city.
 */}}
-<form class="city-picker" action="/restaurants" method="get" hx-history="false">
+<form class="city-picker" action="/restaurants" method="get" hx-history="false"
+      hx-get="/restaurants" hx-trigger="submit, change" hx-target="#results" hx-push-url="true">
   <label for="city">Choose your city</label>
-  <select id="city" name="city"
-          hx-get="/restaurants"
-          hx-trigger="change"
-          hx-target="#results"
-          hx-push-url="true">
+  <select id="city" name="city" required>
     <option value="" disabled {{if not .Selected}}selected{{end}}>Select a city…</option>
     {{range .Cities}}
       <option value="{{.Slug}}" {{if and $.Selected (eq $.Selected.Slug .Slug)}}selected{{end}}>{{.Name}}, {{.State}}</option>
     {{end}}
   </select>
-  <noscript><button class="button" type="submit">Show restaurants</button></noscript>
+  <button class="button button-large" type="submit">Find restaurants</button>
 </form>
 
 {{/* aria-live makes screen readers announce the new results after a swap. */}}
