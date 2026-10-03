@@ -65,8 +65,8 @@ docs/             project guide and slice specs
 | Route | What it does |
 |---|---|
 | `GET /` | Home: pick a city |
-| `GET /restaurants?city={slug}` | A city's restaurants (full page, or just the list for HTMX) |
-| `GET /restaurants/{id}` | A restaurant: food rating, safety profile (badges, last verified date), call-ahead script, and its GF meals |
+| `GET /restaurants?city={slug}&type={salad\|grain\|entree\|dessert}` | A city's restaurants (full page, or just the list for HTMX); `type` keeps restaurants with a GF option of that type |
+| `GET /restaurants/{id}?type=…` | A restaurant: food rating, photos, safety profile, call-ahead sheet, and its meals grouped by gluten status (`type` filters them) |
 | `GET /meals/{id}` | A meal: photo, upvote button, reviews, review form |
 | `POST /meals/{id}/upvote` | Toggle this visitor's upvote (returns the new button for HTMX) |
 | `POST /meals/{id}/reviews` | Post a review (returns the updated reviews section for HTMX) |
