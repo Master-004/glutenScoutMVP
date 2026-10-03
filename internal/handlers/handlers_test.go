@@ -98,7 +98,7 @@ func (f *fakeStore) MealStats(ctx context.Context, mealIDs []int64, visitorID st
 	}
 	stats := map[int64]models.MealStats{}
 	for _, id := range mealIDs {
-		var rating models.Rating
+		rating := models.Rating{ReviewCount: len(f.reviews[id])}
 		sum := 0
 		for _, r := range f.reviews[id] {
 			if r.Rating > 0 {
@@ -171,7 +171,7 @@ func seededStore() *fakeStore {
 	answered := time.Date(2026, 8, 30, 0, 0, 0, 0, time.UTC)
 	return &fakeStore{
 		details: map[int64]models.RestaurantDetail{
-			10: {Restaurant: pizza, CityName: "Provo", CitySlug: "provo-ut", Rating: models.Rating{AvgRating: 4.3, RatingCount: 3}},
+			10: {Restaurant: pizza, CityName: "Provo", CitySlug: "provo-ut", Rating: models.Rating{AvgRating: 4.3, RatingCount: 3, ReviewCount: 4}},
 			11: {Restaurant: solo, CityName: "Provo", CitySlug: "provo-ut"},
 		},
 		safety: map[int64]models.SafetyProfile{

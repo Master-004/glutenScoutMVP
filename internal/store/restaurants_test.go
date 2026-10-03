@@ -135,10 +135,10 @@ func TestListRestaurantsByCity(t *testing.T) {
 			t.Fatal(err)
 		}
 		var rated, diner = got[1], got[0] // sorted: Denver Diner, Rated Place
-		if rated.MealCount != 1 || rated.RatingCount != 3 || rated.AvgRating < 4.33 || rated.AvgRating > 4.34 {
-			t.Errorf("Rated Place = %+v, want 1 meal, 3 ratings, avg 4.33", rated)
+		if rated.MealCount != 1 || rated.RatingCount != 3 || rated.ReviewCount != 3 || rated.AvgRating < 4.33 || rated.AvgRating > 4.34 {
+			t.Errorf("Rated Place = %+v, want 1 meal, 3 reviews and ratings, avg 4.33", rated)
 		}
-		if diner.RatingCount != 0 || diner.AvgRating != 0 || diner.VerifiedOn != nil {
+		if diner.RatingCount != 0 || diner.ReviewCount != 0 || diner.AvgRating != 0 || diner.VerifiedOn != nil {
 			t.Errorf("Denver Diner = %+v, want no ratings and no verified date", diner)
 		}
 	})

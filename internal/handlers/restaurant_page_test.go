@@ -104,7 +104,9 @@ func TestRestaurantPageWithoutSafetyProfile(t *testing.T) {
 	body := get(t, newTestServer(t, seededStore()), "/restaurants/11").Body.String()
 	for _, want := range []string{
 		"No safety information yet", `popovertarget="call-ahead"`,
-		"We don't have a phone number for this restaurant yet.", "No ratings yet",
+		"We don't have a phone number for this restaurant yet.",
+		// Tweak 2: an empty review area is always explained.
+		"No reviews yet. Be the first to review a meal here.",
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("restaurant page missing %q", want)
@@ -112,6 +114,29 @@ func TestRestaurantPageWithoutSafetyProfile(t *testing.T) {
 	}
 	if strings.Contains(body, "Last verified") {
 		t.Error("no profile means no verified date")
+	}
+}
+
+// Tweak 2: "No reviews yet" on the list, the restaurant page and meals.
+func TestNoReviewsYetLabels(t *testing.T) {
+	h := newTestServer(t, seededStore())
+
+	// The fake list rows have zero reviews.
+	if list := get(t, h, "/restaurants?city=provo-ut").Body.String(); !strings.Contains(list, "No reviews yet") {
+		t.Error("restaurant list should label restaurants with zero reviews")
+	}
+
+	// Restaurant 10 has reviews: no empty-state message there.
+	if rest := get(t, h, "/restaurants/10").Body.String(); strings.Contains(rest, "Be the first to review a meal here.") {
+		t.Error("restaurant with reviews shouldn't say it has none")
+	}
+
+	// Meal with zero reviews: card and meal page both explain it.
+	if rest := get(t, h, "/restaurants/10").Body.String(); !strings.Contains(rest, `<span class="rating rating-none">No reviews yet</span>`) {
+		t.Error("meal card with zero reviews should say No reviews yet")
+	}
+	if meal := get(t, h, "/meals/100").Body.String(); !strings.Contains(meal, "No reviews yet. Be the first to share how it went.") {
+		t.Error("meal page with zero reviews should explain the empty list")
 	}
 }
 

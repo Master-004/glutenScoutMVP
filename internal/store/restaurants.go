@@ -45,7 +45,8 @@ func (s *Store) GetCityBySlug(ctx context.Context, slug string) (models.City, er
 // COALESCE turns "no ratings at all" (NULL) into 0.
 const ratingColumns = `
 	COALESCE(AVG(rv.rating) FILTER (WHERE rv.rating > 0), 0)::float8 AS avg_rating,
-	COUNT(rv.id) FILTER (WHERE rv.rating > 0) AS rating_count`
+	COUNT(rv.id) FILTER (WHERE rv.rating > 0) AS rating_count,
+	COUNT(rv.id) AS review_count`
 
 // GetRestaurant returns one restaurant with its city's name and slug, and its
 // food rating across all of its meals' reviews.

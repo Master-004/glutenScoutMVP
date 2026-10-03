@@ -41,6 +41,9 @@
   <span class="rating-num">{{ratingText .AvgRating}}</span>
   <span class="rating-count">· {{.RatingCount}} {{if eq .RatingCount 1}}rating{{else}}ratings{{end}}</span>
 </span>
+{{- else if not .ReviewCount -}}
+{{/* Say why the stars are missing, so an empty spot is never a mystery. */}}
+<span class="rating rating-none">No reviews yet</span>
 {{- else -}}
 <span class="rating rating-none">No ratings yet</span>
 {{- end -}}

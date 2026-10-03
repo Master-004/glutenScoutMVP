@@ -6,6 +6,7 @@
 <section class="restaurant-header">
   <h1>{{.Restaurant.Name}}</h1>
   <p class="header-rating">{{template "star_rating" .Restaurant.Rating}}</p>
+  {{if not .Restaurant.ReviewCount}}<p class="empty-note">No reviews yet. Be the first to review a meal here.</p>{{end}}
   <p class="meta">{{.Restaurant.Cuisine}}</p>
   <p class="meta">{{.Restaurant.Address}}</p>
   {{if .Restaurant.Description}}<p class="description">{{.Restaurant.Description}}</p>{{end}}

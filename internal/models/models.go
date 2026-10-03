@@ -32,6 +32,7 @@ type Restaurant struct {
 type Rating struct {
 	AvgRating   float64 `db:"avg_rating"`   // 0 when nobody has rated yet
 	RatingCount int     `db:"rating_count"` // how many reviews gave a rating
+	ReviewCount int     `db:"review_count"` // all reviews, rated or not (0 = "No reviews yet")
 }
 
 // RestaurantSummary is a restaurant plus how many GF meals it lists, its food

@@ -202,6 +202,7 @@ func (s *Store) MealStats(ctx context.Context, mealIDs []int64, visitorID string
 		SELECT m.id AS meal_id,
 		       (SELECT COALESCE(AVG(rv.rating), 0)::float8 FROM reviews rv WHERE rv.meal_id = m.id AND rv.rating > 0) AS avg_rating,
 		       (SELECT COUNT(*) FROM reviews rv WHERE rv.meal_id = m.id AND rv.rating > 0) AS rating_count,
+		       (SELECT COUNT(*) FROM reviews rv WHERE rv.meal_id = m.id) AS review_count,
 		       (SELECT COUNT(*) FROM meal_upvotes u WHERE u.meal_id = m.id) AS upvotes,
 		       (SELECT COUNT(*) FROM reviews r WHERE r.meal_id = m.id) AS reviews,
 		       EXISTS (SELECT 1 FROM meal_upvotes u WHERE u.meal_id = m.id AND u.visitor_id = $2) AS upvoted
