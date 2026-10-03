@@ -86,6 +86,40 @@ type restaurantPage struct {
 	GFMeals       []mealCard
 	CrossMeals    []mealCard // no gluten ingredients, but shared equipment
 	ContainsMeals []mealCard
+	Photos        []photoGroup
+}
+
+// photoGroup is one labeled group in the restaurant's photo section.
+// Photos may be empty; the template then shows a "No photo yet" tile.
+type photoGroup struct {
+	Label  string
+	Photos []models.RestaurantPhoto
+}
+
+// First returns the group's first photo, or nil if it has none (the
+// template shows a fallback tile for nil).
+func (g photoGroup) First() *models.RestaurantPhoto {
+	if len(g.Photos) == 0 {
+		return nil
+	}
+	return &g.Photos[0]
+}
+
+// groupPhotos always returns the three groups, in the order testers asked
+// for them, so the layout looks the same even when a group has no photo.
+func groupPhotos(photos []models.RestaurantPhoto) []photoGroup {
+	groups := []photoGroup{{Label: "Food"}, {Label: "Storefront"}, {Label: "Prep area"}}
+	for _, p := range photos {
+		switch p.Kind {
+		case models.PhotoFood:
+			groups[0].Photos = append(groups[0].Photos, p)
+		case models.PhotoStorefront:
+			groups[1].Photos = append(groups[1].Photos, p)
+		case models.PhotoPrep:
+			groups[2].Photos = append(groups[2].Photos, p)
+		}
+	}
+	return groups
 }
 
 // groupMeals splits meal cards by gluten status, keeping their order.
@@ -165,7 +199,12 @@ func (h *Handler) restaurant(w http.ResponseWriter, r *http.Request) {
 		h.serverError(w, r, err)
 		return
 	}
-	page := restaurantPage{Restaurant: rest, Safety: safety}
+	photos, err := h.store.ListRestaurantPhotos(r.Context(), id)
+	if err != nil {
+		h.serverError(w, r, err)
+		return
+	}
+	page := restaurantPage{Restaurant: rest, Safety: safety, Photos: groupPhotos(photos)}
 	page.GFMeals, page.CrossMeals, page.ContainsMeals = groupMeals(cards)
 	h.render(w, r, http.StatusOK, "restaurant", page)
 }

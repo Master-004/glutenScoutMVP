@@ -102,7 +102,7 @@ func TestMealPage(t *testing.T) {
 	}
 	body := rec.Body.String()
 	for _, want := range []string{
-		"<h1>GF Margherita</h1>", "Tomato and basil.", `src="/static/images/meals/pizza.svg"`,
+		"<h1>GF Margherita</h1>", "Tomato and basil.", `src="` + mealImage("/static/images/meals/pizza.svg") + `"`,
 		`href="/restaurants/10"`, "Canyon Hearth Pizza", // restaurant link
 		`hx-post="/meals/100/upvote"`,                             // upvote button
 		`id="reviews"`, "Reviews (1)", "Jo", "Safe and delicious", // review list

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Tacos">
+  <rect width="400" height="300" fill="#F4EDE4"/>
+  <ellipse cx="204" cy="158" rx="114" ry="112" fill="#E6DACB"/>
+  <circle cx="200" cy="150" r="112" fill="#FFFFFF"/>
+  <circle cx="200" cy="150" r="94" fill="none" stroke="#EFE7DC" stroke-width="3"/>
+  <path d="M120 190 a50 50 0 0 1 100 0z" fill="#E9C46A"/>
+  <path d="M134 184 q36 -38 72 0" fill="none" stroke="#6BAF5B" stroke-width="12" stroke-linecap="round"/>
+  <path d="M140 188 q30 -24 60 0" fill="none" stroke="#8B4A2B" stroke-width="10" stroke-linecap="round"/>
+  <path d="M180 140 a50 50 0 0 1 100 0z" fill="#E9C46A"/>
+  <path d="M194 134 q36 -38 72 0" fill="none" stroke="#6BAF5B" stroke-width="12" stroke-linecap="round"/>
+  <path d="M200 138 q30 -24 60 0" fill="none" stroke="#E0533D" stroke-width="10" stroke-linecap="round"/>
+  <g fill="#FFF6E5"><circle cx="160" cy="172" r="4"/><circle cx="235" cy="122" r="4"/></g>
+  <path d="M250 200 q20 -10 30 6 q-14 14 -30 -6z" fill="#B5D68A"/>
+</svg>

@@ -16,6 +16,8 @@
   {{if .Restaurant.Description}}<p class="description">{{.Restaurant.Description}}</p>{{end}}
 </section>
 
+{{template "restaurant_photos" .}}
+
 {{/* Design system page order: header → safety profile → meals, with bands
      (not bordered cards) between sections. The call-ahead script is a
      sheet opened from the safety profile, so it doesn't take up the page. */}}

@@ -54,6 +54,20 @@ type RestaurantDetail struct {
 	CitySlug string `db:"city_slug"`
 }
 
+// Restaurant photo groups. They match the CHECK constraint in the database.
+const (
+	PhotoFood       = "food"
+	PhotoStorefront = "storefront"
+	PhotoPrep       = "prep"
+)
+
+// RestaurantPhoto is one picture on a restaurant page.
+type RestaurantPhoto struct {
+	Kind string `db:"kind"` // PhotoFood, PhotoStorefront or PhotoPrep
+	URL  string `db:"url"`
+	Alt  string `db:"alt"`
+}
+
 // Precaution evidence states. They match the CHECK constraint in the database.
 const (
 	EvidenceConfirmed  = "confirmed"  // restaurant and recent reviewers agree

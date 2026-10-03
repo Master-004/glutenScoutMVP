@@ -35,6 +35,35 @@ var funcs = template.FuncMap{
 	"date":          func(t time.Time) string { return t.Format("Jan 2, 2006") },
 	"asPhrase":      asPhrase,
 	"telDigits":     telDigits,
+	"mealImage":     mealImage,
+}
+
+// useIllustratedMeals switches meal images to the drawings in
+// web/static/images/meals/illustrated/. Set it to false to go back to the
+// original simple images; nothing else (including the database) changes.
+const useIllustratedMeals = true
+
+const (
+	mealImageDir       = "/static/images/meals/"
+	illustratedMealDir = "/static/images/meals/illustrated/"
+)
+
+// mealImage returns the image URL to show for a meal's photo_url.
+// An empty photo_url gets the placeholder. With useIllustratedMeals, our own
+// meal images are swapped for the illustrated versions (same file names);
+// any other URL (e.g. a real photo, later) is used as is.
+func mealImage(photoURL string) string {
+	dir := mealImageDir
+	if useIllustratedMeals {
+		dir = illustratedMealDir
+	}
+	if photoURL == "" {
+		return dir + "placeholder.svg"
+	}
+	if name, ok := strings.CutPrefix(photoURL, mealImageDir); ok && !strings.Contains(name, "/") {
+		return dir + name
+	}
+	return photoURL
 }
 
 // asPhrase turns a badge label into words that fit mid-sentence:

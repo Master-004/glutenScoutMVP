@@ -24,7 +24,7 @@ func TestRestaurantPageFound(t *testing.T) {
 		// Meal cards with name, description, and photo.
 		"GF Margherita", "Tomato and basil.",
 		// Images are lazy and use the meal name as alt text.
-		`src="/static/images/meals/pizza.svg" alt="GF Margherita" loading="lazy"`,
+		`src="` + mealImage("/static/images/meals/pizza.svg") + `" alt="GF Margherita" loading="lazy"`,
 		disclaimer,
 	} {
 		if !strings.Contains(body, want) {
@@ -78,13 +78,14 @@ func TestRestaurantPageGroupsMealsByGlutenStatus(t *testing.T) {
 		t.Fatalf("want sections in order GF, cross-contact, contains; got %d, %d, %d", gf, cross, contains)
 	}
 	// Each meal lands in its own group.
-	if i := strings.Index(body, "GF Margherita"); i < gf || i > cross {
+	// (Look for the card headings: meal names also appear in photo alt text.)
+	if i := strings.Index(body, "<h3>GF Margherita"); i < gf || i > cross {
 		t.Error("GF Margherita should be in the GF section")
 	}
-	if i := strings.Index(body, "House Fries"); i < cross || i > contains {
+	if i := strings.Index(body, "<h3>House Fries"); i < cross || i > contains {
 		t.Error("House Fries should be in the cross-contact section")
 	}
-	if i := strings.Index(body, "Garlic Knots"); i < contains {
+	if i := strings.Index(body, "<h3>Garlic Knots"); i < contains {
 		t.Error("Garlic Knots should be in the contains-gluten section")
 	}
 	// Status in icon + words + color, plus the reason.
@@ -115,6 +116,41 @@ func TestRestaurantPageWithoutSafetyProfile(t *testing.T) {
 	// (The info sheet mentions "Last verified" in general; look for a date.)
 	if regexp.MustCompile(`Last verified [A-Z][a-z]{2} \d`).MatchString(body) {
 		t.Error("no profile means no verified date")
+	}
+}
+
+// Tweak 4: a photo section with Food, Storefront and Prep area, a fallback
+// tile for a missing photo, and an "Add a photo" coming-soon sheet.
+func TestRestaurantPhotos(t *testing.T) {
+	h := newTestServer(t, seededStore())
+	body := get(t, h, "/restaurants/10").Body.String()
+
+	food := strings.Index(body, `<p class="photo-label">Food</p>`)
+	store := strings.Index(body, `<p class="photo-label">Storefront</p>`)
+	prep := strings.Index(body, `<p class="photo-label">Prep area</p>`)
+	if food < 0 || store < 0 || prep < 0 || !(food < store && store < prep) {
+		t.Fatalf("want Food, Storefront, Prep area groups in order; got %d, %d, %d", food, store, prep)
+	}
+	for _, want := range []string{
+		// Every image has alt text; meal paths go through mealImage.
+		`src="` + mealImage("/static/images/meals/pizza.svg") + `" alt="Illustration of GF Margherita"`,
+		`src="/static/images/places/storefront-1.svg" alt="Illustration of the outside of Canyon Hearth Pizza"`,
+		// No prep photo: a fallback tile, not a broken image.
+		`<div class="photo-missing">No photo yet</div>`,
+		// Add a photo: coming soon, no upload.
+		`popovertarget="add-photo">Add a photo</button>`, "Coming soon",
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("restaurant page missing %q", want)
+		}
+	}
+	if strings.Contains(body, `type="file"`) {
+		t.Error("there should be no real upload field")
+	}
+
+	// A restaurant with no photos still shows all three groups.
+	if none := get(t, h, "/restaurants/11").Body.String(); strings.Count(none, `class="photo-missing"`) != 3 {
+		t.Error("restaurant without photos should show three fallback tiles")
 	}
 }
 
@@ -173,7 +209,10 @@ func TestNoReviewsYetLabels(t *testing.T) {
 func TestRestaurantPageMissingPhotoUsesPlaceholder(t *testing.T) {
 	body := get(t, newTestServer(t, seededStore()), "/restaurants/10").Body.String()
 	// Harvest Salad has no photo_url, so it should get the placeholder.
-	want := `src="/static/images/meals/placeholder.svg" alt="Harvest Salad"`
+	want := `src="` + mealImage("") + `" alt="Harvest Salad"`
+	if !strings.HasSuffix(mealImage(""), "/placeholder.svg") {
+		t.Fatalf("empty photo should map to a placeholder, got %q", mealImage(""))
+	}
 	if !strings.Contains(body, want) {
 		t.Error("meal without a photo should show the placeholder image")
 	}

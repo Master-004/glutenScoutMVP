@@ -25,6 +25,7 @@ type fakeStore struct {
 	restaurants map[int64][]models.RestaurantSummary // keyed by city id
 	details     map[int64]models.RestaurantDetail    // keyed by restaurant id
 	safety      map[int64]models.SafetyProfile       // keyed by restaurant id
+	photos      map[int64][]models.RestaurantPhoto   // keyed by restaurant id
 	meals       map[int64][]models.Meal              // keyed by restaurant id
 	reviews     map[int64][]models.Review            // keyed by meal id, newest first
 	upvotes     map[int64]map[string]bool            // meal id -> visitor ids who upvoted
@@ -135,6 +136,10 @@ func (f *fakeStore) GetSafetyProfile(ctx context.Context, restaurantID int64) (m
 	return f.safety[restaurantID], f.err // missing key = zero profile, like the real store
 }
 
+func (f *fakeStore) ListRestaurantPhotos(ctx context.Context, restaurantID int64) ([]models.RestaurantPhoto, error) {
+	return f.photos[restaurantID], f.err
+}
+
 func (f *fakeStore) ListMealsByRestaurant(ctx context.Context, restaurantID int64) ([]models.Meal, error) {
 	return f.meals[restaurantID], f.err
 }
@@ -173,6 +178,14 @@ func seededStore() *fakeStore {
 		details: map[int64]models.RestaurantDetail{
 			10: {Restaurant: pizza, CityName: "Provo", CitySlug: "provo-ut", Rating: models.Rating{AvgRating: 4.3, RatingCount: 3, ReviewCount: 4}},
 			11: {Restaurant: solo, CityName: "Provo", CitySlug: "provo-ut"},
+		},
+		// Restaurant 10 has a food and a storefront photo but no prep-area
+		// photo (to test the fallback tile); restaurant 11 has none.
+		photos: map[int64][]models.RestaurantPhoto{
+			10: {
+				{Kind: models.PhotoFood, URL: "/static/images/meals/pizza.svg", Alt: "Illustration of GF Margherita"},
+				{Kind: models.PhotoStorefront, URL: "/static/images/places/storefront-1.svg", Alt: "Illustration of the outside of Canyon Hearth Pizza"},
+			},
 		},
 		safety: map[int64]models.SafetyProfile{
 			10: {

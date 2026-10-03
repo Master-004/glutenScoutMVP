@@ -26,6 +26,7 @@ type Store interface {
 
 	GetRestaurant(ctx context.Context, id int64) (models.RestaurantDetail, error)
 	GetSafetyProfile(ctx context.Context, restaurantID int64) (models.SafetyProfile, error)
+	ListRestaurantPhotos(ctx context.Context, restaurantID int64) ([]models.RestaurantPhoto, error)
 	ListMealsByRestaurant(ctx context.Context, restaurantID int64) ([]models.Meal, error)
 
 	GetMeal(ctx context.Context, id int64) (models.MealDetail, error)

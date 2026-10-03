@@ -8,7 +8,8 @@
 */}}
 {{define "meal_photo"}}
 <div class="meal-photo">
-  <img src="{{if .PhotoURL}}{{.PhotoURL}}{{else}}/static/images/meals/placeholder.svg{{end}}" alt="{{.Name}}" loading="lazy" width="400" height="300">
+  {{/* mealImage picks the file (illustrated or original, or the placeholder). */}}
+  <img src="{{mealImage .PhotoURL}}" alt="{{.Name}}" loading="lazy" width="400" height="300">
 </div>
 {{end}}
 

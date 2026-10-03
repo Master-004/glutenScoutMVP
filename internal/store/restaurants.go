@@ -104,6 +104,23 @@ func (s *Store) ListRestaurantsByCity(ctx context.Context, cityID int64) ([]mode
 	return list, nil
 }
 
+// ListRestaurantPhotos returns a restaurant's photos, grouped by kind and in
+// display order.
+func (s *Store) ListRestaurantPhotos(ctx context.Context, restaurantID int64) ([]models.RestaurantPhoto, error) {
+	rows, err := s.pool.Query(ctx, `
+		SELECT kind, url, alt FROM restaurant_photos
+		WHERE restaurant_id = $1
+		ORDER BY kind, position, id`, restaurantID)
+	if err != nil {
+		return nil, fmt.Errorf("list photos for restaurant %d: %w", restaurantID, err)
+	}
+	photos, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.RestaurantPhoto])
+	if err != nil {
+		return nil, fmt.Errorf("list photos for restaurant %d: %w", restaurantID, err)
+	}
+	return photos, nil
+}
+
 // GetSafetyProfile returns a restaurant's safety profile and its precaution
 // badges in display order. A restaurant without a profile gets a zero
 // SafetyProfile (Found == false), not an error: "no information yet" is a

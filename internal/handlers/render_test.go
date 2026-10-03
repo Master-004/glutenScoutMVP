@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"io/fs"
 	"strings"
 	"testing"
+
+	"github.com/Master-004/glutenscout/web"
 )
 
 func TestStars(t *testing.T) {
@@ -24,6 +27,33 @@ func TestStars(t *testing.T) {
 	}
 	if got := ratingText(4.33); got != "4.5" {
 		t.Errorf("ratingText(4.33) = %q, want 4.5", got)
+	}
+}
+
+// Every meal image the app can point to must exist in the embedded files,
+// in whichever folder useIllustratedMeals selects.
+func TestMealImagesExist(t *testing.T) {
+	originals, err := fs.Glob(web.FS, "static/images/meals/*.svg")
+	if err != nil || len(originals) == 0 {
+		t.Fatalf("no original meal images found: %v", err)
+	}
+	for _, orig := range originals {
+		url := mealImage("/" + orig)
+		if _, err := fs.Stat(web.FS, strings.TrimPrefix(url, "/")); err != nil {
+			t.Errorf("%s maps to %s, which doesn't exist", orig, url)
+		}
+	}
+	// Restaurant photo illustrations (storefronts, prep areas) exist too.
+	for _, p := range []string{"storefront-1", "storefront-2", "prep-1", "prep-2"} {
+		if _, err := fs.Stat(web.FS, "static/images/places/"+p+".svg"); err != nil {
+			t.Errorf("missing place image %s: %v", p, err)
+		}
+	}
+	if got := mealImage("/static/images/places/prep-1.svg"); got != "/static/images/places/prep-1.svg" {
+		t.Errorf("place images should pass through mealImage unchanged, got %q", got)
+	}
+	if got := mealImage("https://example.com/photo.jpg"); got != "https://example.com/photo.jpg" {
+		t.Errorf("other URLs should pass through unchanged, got %q", got)
 	}
 }
 

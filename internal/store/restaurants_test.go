@@ -88,6 +88,28 @@ func TestGetSafetyProfile(t *testing.T) {
 	}
 }
 
+func TestListRestaurantPhotos(t *testing.T) {
+	ctx := context.Background()
+	s := newTestStore(t)
+	rest := insertRestaurant(t, s, insertCity(t, s, "Provo", "provo-ut"), "Photo Place")
+	if _, err := s.pool.Exec(ctx, `
+		INSERT INTO restaurant_photos (restaurant_id, kind, url, alt) VALUES
+		  ($1, 'storefront', '/static/images/places/storefront-1.svg', 'Outside'),
+		  ($1, 'food', '/static/images/meals/pizza.svg', 'Pizza')`, rest); err != nil {
+		t.Fatal(err)
+	}
+	photos, err := s.ListRestaurantPhotos(ctx, rest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(photos) != 2 || photos[0].Kind != "food" || photos[0].Alt != "Pizza" || photos[1].Kind != "storefront" {
+		t.Errorf("photos = %+v", photos)
+	}
+	if _, err := s.pool.Exec(ctx, `INSERT INTO restaurant_photos (restaurant_id, kind, url, alt) VALUES ($1, 'menu', 'x', 'x')`, rest); err == nil {
+		t.Error("unknown photo kind should be rejected")
+	}
+}
+
 func TestListRestaurantsByCity(t *testing.T) {
 	s := newTestStore(t)
 	provo := insertCity(t, s, "Provo", "provo-ut")

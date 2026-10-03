@@ -1285,6 +1285,63 @@ p {
   transform: rotate(90deg);
 }
 
+/* ---------- Restaurant photos ---------- */
+
+.photos {
+  margin-top: var(--space-6);
+}
+
+.photos .section-head .button-secondary {
+  margin-top: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Three equal tiles in a row, even on a 375px phone. */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.photo-tile img,
+.photo-missing {
+  width: 100%;
+  height: auto; /* let aspect-ratio win over the img's height attribute */
+  aspect-ratio: 4 / 3; /* same box with or without a photo: no layout jump */
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--surface);
+}
+
+/* Fallback when a group has no photo yet. */
+.photo-missing {
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--divider);
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.photo-label {
+  margin: var(--space-1) 0 0;
+  font-size: 13px; /* meta */
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.photo-note {
+  margin: var(--space-2) 0 0;
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
 /* ---------- Call-ahead script ---------- */
 
 .script {

@@ -3,7 +3,9 @@
 --
 -- Safe to re-run: rows use fixed ids and ON CONFLICT DO NOTHING, so running
 -- `docker compose up` again never duplicates or wipes data.
--- A couple of meals have an empty photo_url on purpose to show the placeholder image.
+-- A few meals are inserted with an empty photo_url; an UPDATE further down
+-- gives them a picture. (The app still shows a placeholder for any meal
+-- without one.)
 
 INSERT INTO cities (id, name, state, slug) VALUES
   (1, 'Provo',          'UT', 'provo-ut'),
@@ -117,6 +119,44 @@ INSERT INTO meals (id, restaurant_id, name, description, photo_url, gf_status, g
   (57, 12, 'Garlic Naan',             'Tandoor-baked flatbread with garlic.',                          '',                                  'contains',      'Wheat flour.'),
   (58, 12, 'Vegetable Pakoras',       'Spiced vegetable fritters.',                                    '/static/images/meals/curry.svg',    'cross_contact', 'Chickpea-flour batter, but fried in shared oil.')
 ON CONFLICT (id) DO NOTHING;
+
+-- Every meal gets a picture (illustrations, not real photos). An UPDATE so
+-- existing databases get them too; "photo_url = ''" never overwrites one.
+UPDATE meals SET photo_url = v.url
+FROM (VALUES
+  (10, '/static/images/meals/rolls.svg'),   -- Fresh Spring Rolls
+  (28, '/static/images/meals/dessert.svg'), -- GF Blueberry Muffin
+  (47, '/static/images/meals/bread.svg'),   -- Garlic Knots
+  (48, '/static/images/meals/rolls.svg'),   -- Crispy Egg Rolls
+  (53, '/static/images/meals/bread.svg'),   -- Garlic Bread
+  (57, '/static/images/meals/bread.svg')    -- Garlic Naan
+) AS v(id, url)
+WHERE meals.id = v.id AND meals.photo_url = '';
+
+-- Restaurant photos: one per group (food, storefront, prep area) for every
+-- sample restaurant. All are local placeholder illustrations.
+-- Food: the restaurant's first GF option that has a picture.
+INSERT INTO restaurant_photos (restaurant_id, kind, url, alt)
+SELECT DISTINCT ON (m.restaurant_id) m.restaurant_id, 'food', m.photo_url, 'Illustration of ' || m.name
+FROM meals m
+WHERE m.photo_url <> '' AND m.gf_status = 'gf'
+ORDER BY m.restaurant_id, m.id
+ON CONFLICT (restaurant_id, kind, url) DO NOTHING;
+
+-- Storefront and prep area: two illustration variants, alternating by id.
+INSERT INTO restaurant_photos (restaurant_id, kind, url, alt)
+SELECT r.id, 'storefront',
+       '/static/images/places/storefront-' || (r.id % 2 + 1) || '.svg',
+       'Illustration of the outside of ' || r.name
+FROM restaurants r
+ON CONFLICT (restaurant_id, kind, url) DO NOTHING;
+
+INSERT INTO restaurant_photos (restaurant_id, kind, url, alt)
+SELECT r.id, 'prep',
+       '/static/images/places/prep-' || ((r.id + 1) % 2 + 1) || '.svg',
+       'Illustration of the prep area at ' || r.name
+FROM restaurants r
+ON CONFLICT (restaurant_id, kind, url) DO NOTHING;
 
 -- Phone numbers for the call-ahead script. 555-0100 to 555-0199 are reserved
 -- for fiction, so these can never ring a real business.

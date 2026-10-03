@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Kitchen prep area illustration">
+  <rect width="400" height="300" fill="#F1EFEA"/>
+  <rect x="30" y="30" width="340" height="110" rx="6" fill="#FFFFFF" stroke="#E2DED6" stroke-width="3"/>
+  <g stroke="#C9C3B8" stroke-width="4" stroke-linecap="round"><line x1="70" y1="46" x2="70" y2="100"/><line x1="100" y1="46" x2="100" y2="110"/><line x1="130" y1="46" x2="130" y2="96"/></g>
+  <g fill="#8B95A0"><circle cx="70" cy="104" r="8"/><rect x="94" y="108" width="12" height="18" rx="4"/><path d="M122 96 h16 l-4 22 h-8z"/></g>
+  <rect x="200" y="60" width="140" height="60" rx="6" fill="#E9F3EC" stroke="#B9DEC8" stroke-width="3"/>
+  <g fill="#6BAF5B"><rect x="214" y="74" width="50" height="8" rx="4"/><rect x="214" y="92" width="80" height="8" rx="4"/></g>
+  <rect x="0" y="180" width="400" height="18" fill="#D6D1C7"/>
+  <rect x="0" y="198" width="400" height="102" fill="#BFB8AB"/>
+  <ellipse cx="120" cy="170" rx="56" ry="12" fill="#C2C9CE"/>
+  <ellipse cx="120" cy="166" rx="48" ry="8" fill="#DCE1E4"/>
+  <rect x="210" y="150" width="120" height="30" rx="6" fill="#4F7FA0"/>
+  <g fill="#FFFFFF" opacity=".6"><rect x="224" y="158" width="44" height="5" rx="2"/></g>
+</svg>
