@@ -33,6 +33,10 @@
   away in a <details> (a built-in show/hide, no JavaScript) so they don't
   crowd out the GF options but are still there for anyone who looks.
 */}}
+<div id="meals">
+{{/* Food-type filter for this restaurant's meals (all three groups). */}}
+{{template "filter_chips" .Chips}}
+
 <section aria-labelledby="gf-heading">
   <h2 id="gf-heading" class="section-header">Gluten-free options</h2>
   {{if .GFMeals}}
@@ -40,6 +44,10 @@
   <ul class="meal-grid">
     {{range .GFMeals}}<li>{{template "meal_card" .}}</li>{{end}}
   </ul>
+  {{else if .FoodType}}
+  {{/* A filter with no GF results says so, with a way back to everything. */}}
+  <p class="empty">No gluten-free {{.FoodType.Noun}} listed here yet.
+    <a href="/restaurants/{{.Restaurant.ID}}#meals">Show all meals</a></p>
   {{else}}
   <p class="empty">No GF meals listed yet.</p>
   {{end}}
@@ -63,4 +71,5 @@
   </ul>
 </details>
 {{end}}
+</div>
 {{end}}

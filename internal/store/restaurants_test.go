@@ -74,7 +74,7 @@ func TestGetSafetyProfile(t *testing.T) {
 	}
 
 	// The list shows the verified date too.
-	list, err := s.ListRestaurantsByCity(ctx, city)
+	list, err := s.ListRestaurantsByCity(ctx, city, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -115,6 +115,7 @@ func TestListRestaurantsByCity(t *testing.T) {
 	provo := insertCity(t, s, "Provo", "provo-ut")
 	denver := insertCity(t, s, "Denver", "denver-co")
 	empty := insertCity(t, s, "Emptyville", "emptyville-ut")
+	filterCity := insertCity(t, s, "Filterton", "filterton-ut")
 
 	zeta := insertRestaurant(t, s, provo, "Zeta Grill")
 	insertMeal(t, s, zeta, "Burger", "")
@@ -126,7 +127,7 @@ func TestListRestaurantsByCity(t *testing.T) {
 	insertRestaurant(t, s, denver, "Denver Diner")
 
 	t.Run("sorted by name with meal counts, only this city", func(t *testing.T) {
-		got, err := s.ListRestaurantsByCity(context.Background(), provo)
+		got, err := s.ListRestaurantsByCity(context.Background(), provo, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -152,7 +153,7 @@ func TestListRestaurantsByCity(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		got, err := s.ListRestaurantsByCity(ctx, denver)
+		got, err := s.ListRestaurantsByCity(ctx, denver, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -165,8 +166,32 @@ func TestListRestaurantsByCity(t *testing.T) {
 		}
 	})
 
+	t.Run("food type filter keeps only restaurants with a GF option of that type", func(t *testing.T) {
+		ctx := context.Background()
+		sweet := insertRestaurant(t, s, filterCity, "Sweet Spot")
+		mustInsert(t, s, `INSERT INTO meals (restaurant_id, name, food_type) VALUES ($1, 'Flourless Cake', 'dessert') RETURNING id`, sweet)
+		// Only dessert has gluten: must not count as "has a GF dessert".
+		gluten := insertRestaurant(t, s, filterCity, "Gluten Bakery")
+		mustInsert(t, s, `INSERT INTO meals (restaurant_id, name, food_type, gf_status) VALUES ($1, 'Croissant', 'dessert', 'contains') RETURNING id`, gluten)
+		insertMeal(t, s, insertRestaurant(t, s, filterCity, "Plain Grill"), "Steak", "")
+
+		got, err := s.ListRestaurantsByCity(ctx, filterCity, "dessert")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(got) != 1 || got[0].Name != "Sweet Spot" {
+			t.Errorf("dessert filter = %+v, want only Sweet Spot", got)
+		}
+		if all, _ := s.ListRestaurantsByCity(ctx, filterCity, ""); len(all) != 3 {
+			t.Errorf("no filter: got %d restaurants, want 3", len(all))
+		}
+		if _, err := s.pool.Exec(ctx, `UPDATE meals SET food_type = 'snack' WHERE restaurant_id = $1`, sweet); err == nil {
+			t.Error("unknown food type should be rejected")
+		}
+	})
+
 	t.Run("city with no restaurants", func(t *testing.T) {
-		got, err := s.ListRestaurantsByCity(context.Background(), empty)
+		got, err := s.ListRestaurantsByCity(context.Background(), empty, "")
 		if err != nil {
 			t.Fatal(err)
 		}

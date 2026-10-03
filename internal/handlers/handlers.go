@@ -22,7 +22,7 @@ type Store interface {
 
 	ListCities(ctx context.Context) ([]models.City, error)
 	GetCityBySlug(ctx context.Context, slug string) (models.City, error)
-	ListRestaurantsByCity(ctx context.Context, cityID int64) ([]models.RestaurantSummary, error)
+	ListRestaurantsByCity(ctx context.Context, cityID int64, foodType string) ([]models.RestaurantSummary, error)
 
 	GetRestaurant(ctx context.Context, id int64) (models.RestaurantDetail, error)
 	GetSafetyProfile(ctx context.Context, restaurantID int64) (models.SafetyProfile, error)

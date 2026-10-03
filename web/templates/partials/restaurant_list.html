@@ -10,6 +10,8 @@
 {{if .Fragment}}<title>Restaurants in {{.Selected.Name}} · GlutenScout</title>{{end}}
 <div class="band" role="presentation"></div>
 <h2 class="section-header">GF-friendly restaurants in {{.Selected.Name}}</h2>
+{{/* Food-type filter: shows restaurants with a GF option of that type. */}}
+{{template "filter_chips" .Chips}}
 {{if .Restaurants}}
 {{/* The next step, in words, for first-time users. */}}
 <p class="next-step">Tap a restaurant to see its gluten-free meals.</p>
@@ -18,7 +20,8 @@
 <ul class="row-list">
   {{range .Restaurants}}
   <li>
-    <a class="restaurant-row" href="/restaurants/{{.ID}}">
+    {{/* Carry the food-type filter into the restaurant's meal list. */}}
+    <a class="restaurant-row" href="/restaurants/{{.ID}}{{with $.FoodType}}?type={{.Value}}#meals{{end}}">
       <h3>{{.Name}}</h3>
       <p class="row-rating">{{template "star_rating" .Rating}}</p>
       <p class="cuisine">{{.Cuisine}}</p>
@@ -33,6 +36,10 @@
   </li>
   {{end}}
 </ul>
+{{else if .FoodType}}
+{{/* A filter with no results says so, with a way back to everything. */}}
+<p class="empty">No restaurants in {{.Selected.Name}} have a gluten-free {{.FoodType.Noun}} listed yet.
+  <a href="/restaurants?city={{.Selected.Slug}}" hx-get="/restaurants?city={{.Selected.Slug}}" hx-target="#results" hx-push-url="true">Show all restaurants</a></p>
 {{else}}
 <p class="empty">No restaurants here yet.</p>
 {{end}}

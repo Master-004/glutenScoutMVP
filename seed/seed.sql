@@ -120,6 +120,27 @@ INSERT INTO meals (id, restaurant_id, name, description, photo_url, gf_status, g
   (58, 12, 'Vegetable Pakoras',       'Spiced vegetable fritters.',                                    '/static/images/meals/curry.svg',    'cross_contact', 'Chickpea-flour batter, but fried in shared oil.')
 ON CONFLICT (id) DO NOTHING;
 
+-- A dessert with gluten, so the Desserts filter has a non-GF one to leave out.
+INSERT INTO meals (id, restaurant_id, name, description, photo_url, gf_status, gf_note, food_type) VALUES
+  (59, 13, 'Chocolate Chip Cookie', 'Warm, chewy cookie baked in house.', '/static/images/meals/dessert.svg', 'contains', 'Made with wheat flour.', 'dessert')
+ON CONFLICT (id) DO NOTHING;
+
+-- Food types for filtering (everything else stays 'entree', the default).
+-- "food_type = 'entree'" means re-running never overwrites a change.
+UPDATE meals SET food_type = v.food_type
+FROM (VALUES
+  -- Salads
+  (3, 'salad'), (16, 'salad'), (46, 'salad'),
+  -- Grain-based: pizza, noodles, rice, pasta, bread, pancakes, bowls
+  (1, 'grain'), (2, 'grain'), (8, 'grain'), (9, 'grain'), (13, 'grain'), (18, 'grain'),
+  (19, 'grain'), (21, 'grain'), (22, 'grain'), (25, 'grain'), (26, 'grain'), (27, 'grain'),
+  (34, 'grain'), (42, 'grain'), (44, 'grain'), (47, 'grain'), (50, 'grain'), (52, 'grain'),
+  (53, 'grain'), (55, 'grain'), (57, 'grain'),
+  -- Desserts
+  (7, 'dessert'), (17, 'dessert'), (24, 'dessert'), (28, 'dessert')
+) AS v(id, food_type)
+WHERE meals.id = v.id AND meals.food_type = 'entree';
+
 -- Every meal gets a picture (illustrations, not real photos). An UPDATE so
 -- existing databases get them too; "photo_url = ''" never overwrites one.
 UPDATE meals SET photo_url = v.url

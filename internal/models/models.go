@@ -110,8 +110,17 @@ type Meal struct {
 	PhotoURL     string    `db:"photo_url"` // empty means "show the placeholder image"
 	GFStatus     string    `db:"gf_status"` // one of GFOption, CrossContact, ContainsGF
 	GFNote       string    `db:"gf_note"`   // why, in words; "" if nothing to add
+	FoodType     string    `db:"food_type"` // one of the Food* constants
 	CreatedAt    time.Time `db:"created_at"`
 }
+
+// Meal food types, for the filter chips. They match the CHECK constraint.
+const (
+	FoodSalad   = "salad"
+	FoodGrain   = "grain"
+	FoodEntree  = "entree"
+	FoodDessert = "dessert"
+)
 
 // MealDetail is a meal plus its restaurant's name and city, for the meal
 // page's links back to the restaurant and to the city's restaurant list.

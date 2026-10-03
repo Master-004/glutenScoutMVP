@@ -90,7 +90,7 @@ func NormalizeReview(in ReviewInput) (ReviewInput, error) {
 // It returns ErrNotFound if no meal has that id.
 func (s *Store) GetMeal(ctx context.Context, id int64) (models.MealDetail, error) {
 	const q = `
-		SELECT m.id, m.restaurant_id, m.name, m.description, m.photo_url, m.gf_status, m.gf_note, m.created_at,
+		SELECT m.id, m.restaurant_id, m.name, m.description, m.photo_url, m.gf_status, m.gf_note, m.food_type, m.created_at,
 		       r.name AS restaurant_name, c.name AS city_name, c.slug AS city_slug
 		FROM meals m
 		JOIN restaurants r ON r.id = m.restaurant_id

@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/Master-004/glutenscout/internal/models"
@@ -16,6 +18,8 @@ type homePage struct {
 	Selected    *models.City
 	Restaurants []models.RestaurantSummary
 	Fragment    bool // true when rendering only the list for an HTMX swap
+	FoodType    *foodType    // the active food-type filter; nil = all
+	Chips       []filterChip // the food-type filter chips
 }
 
 // home shows the welcome line and the city dropdown.
@@ -56,12 +60,22 @@ func (h *Handler) restaurants(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	list, err := h.store.ListRestaurantsByCity(r.Context(), city.ID)
+	ft := parseFoodType(r.URL.Query().Get("type"))
+	typeValue := ""
+	if ft != nil {
+		typeValue = ft.Value
+	}
+	list, err := h.store.ListRestaurantsByCity(r.Context(), city.ID, typeValue)
 	if err != nil {
 		h.serverError(w, r, err)
 		return
 	}
-	data := homePage{Selected: &city, Restaurants: list}
+	data := homePage{
+		Selected:    &city,
+		Restaurants: list,
+		FoodType:    ft,
+		Chips:       filterChips("/restaurants", url.Values{"city": {city.Slug}}, ft, "", "#results"),
+	}
 
 	if isFragmentRequest(r) {
 		data.Fragment = true
@@ -87,6 +101,13 @@ type restaurantPage struct {
 	CrossMeals    []mealCard // no gluten ingredients, but shared equipment
 	ContainsMeals []mealCard
 	Photos        []photoGroup
+	FoodType      *foodType    // the active food-type filter; nil = all
+	Chips         []filterChip // the food-type filter chips for the meal list
+}
+
+// HasMeals reports whether any meal is left after filtering.
+func (p restaurantPage) HasMeals() bool {
+	return len(p.GFMeals)+len(p.CrossMeals)+len(p.ContainsMeals) > 0
 }
 
 // photoGroup is one labeled group in the restaurant's photo section.
@@ -204,8 +225,16 @@ func (h *Handler) restaurant(w http.ResponseWriter, r *http.Request) {
 		h.serverError(w, r, err)
 		return
 	}
-	page := restaurantPage{Restaurant: rest, Safety: safety, Photos: groupPhotos(photos)}
-	page.GFMeals, page.CrossMeals, page.ContainsMeals = groupMeals(cards)
+	ft := parseFoodType(r.URL.Query().Get("type"))
+	page := restaurantPage{
+		Restaurant: rest,
+		Safety:     safety,
+		Photos:     groupPhotos(photos),
+		FoodType:   ft,
+		// "#meals" keeps the meal list in view after tapping a chip.
+		Chips: filterChips(fmt.Sprintf("/restaurants/%d", id), nil, ft, "#meals", ""),
+	}
+	page.GFMeals, page.CrossMeals, page.ContainsMeals = groupMeals(filterMeals(cards, ft))
 	h.render(w, r, http.StatusOK, "restaurant", page)
 }
 

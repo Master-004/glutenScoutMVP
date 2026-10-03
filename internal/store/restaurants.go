@@ -78,7 +78,10 @@ func (s *Store) GetRestaurant(ctx context.Context, id int64) (models.RestaurantD
 // ListRestaurantsByCity returns a city's restaurants sorted by name, each with
 // a count of its GF options (not meals with gluten or a cross-contact risk),
 // its food rating, and its last-verified date.
-func (s *Store) ListRestaurantsByCity(ctx context.Context, cityID int64) ([]models.RestaurantSummary, error) {
+//
+// foodType ("" for all) keeps only restaurants with at least one GF option of
+// that type: "Desserts" means "somewhere I can get a gluten-free dessert".
+func (s *Store) ListRestaurantsByCity(ctx context.Context, cityID int64, foodType string) ([]models.RestaurantSummary, error) {
 	// LEFT JOIN (not JOIN) keeps restaurants with zero meals, reviews or
 	// safety profile. Joining reviews repeats each meal once per review, so
 	// meals are counted with DISTINCT.
@@ -91,9 +94,12 @@ func (s *Store) ListRestaurantsByCity(ctx context.Context, cityID int64) ([]mode
 		LEFT JOIN reviews rv ON rv.meal_id = m.id
 		LEFT JOIN safety_profiles sp ON sp.restaurant_id = r.id
 		WHERE r.city_id = $1
+		  AND ($2 = '' OR EXISTS (
+		        SELECT 1 FROM meals f
+		        WHERE f.restaurant_id = r.id AND f.gf_status = 'gf' AND f.food_type = $2))
 		GROUP BY r.id, sp.verified_on
 		ORDER BY r.name, r.id`
-	rows, err := s.pool.Query(ctx, q, cityID)
+	rows, err := s.pool.Query(ctx, q, cityID, foodType)
 	if err != nil {
 		return nil, fmt.Errorf("list restaurants for city %d: %w", cityID, err)
 	}

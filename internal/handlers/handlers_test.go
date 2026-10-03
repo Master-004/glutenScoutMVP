@@ -162,8 +162,22 @@ func (f *fakeStore) GetCityBySlug(ctx context.Context, slug string) (models.City
 	return models.City{}, store.ErrNotFound
 }
 
-func (f *fakeStore) ListRestaurantsByCity(ctx context.Context, cityID int64) ([]models.RestaurantSummary, error) {
-	return f.restaurants[cityID], f.err
+// ListRestaurantsByCity mimics the real filter: with a food type, keep only
+// restaurants that have a GF option of that type.
+func (f *fakeStore) ListRestaurantsByCity(ctx context.Context, cityID int64, foodType string) ([]models.RestaurantSummary, error) {
+	if foodType == "" || f.err != nil {
+		return f.restaurants[cityID], f.err
+	}
+	var out []models.RestaurantSummary
+	for _, r := range f.restaurants[cityID] {
+		for _, m := range f.meals[r.ID] {
+			if (m.GFStatus == "" || m.GFStatus == models.GFOption) && m.FoodType == foodType {
+				out = append(out, r)
+				break
+			}
+		}
+	}
+	return out, nil
 }
 
 // seededStore returns a fake with two cities: Provo (two restaurants) and
@@ -202,8 +216,8 @@ func seededStore() *fakeStore {
 		},
 		meals: map[int64][]models.Meal{
 			10: {
-				{ID: 100, RestaurantID: 10, Name: "GF Margherita", Description: "Tomato and basil.", PhotoURL: "/static/images/meals/pizza.svg"},
-				{ID: 101, RestaurantID: 10, Name: "Harvest Salad", Description: "Greens and squash."},
+				{ID: 100, RestaurantID: 10, Name: "GF Margherita", Description: "Tomato and basil.", PhotoURL: "/static/images/meals/pizza.svg", FoodType: models.FoodGrain},
+				{ID: 101, RestaurantID: 10, Name: "Harvest Salad", Description: "Greens and squash.", FoodType: models.FoodSalad},
 			},
 		},
 		cities: []models.City{
