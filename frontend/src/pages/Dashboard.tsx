@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { CityPicker } from "../components/CityPicker";
 import { RestaurantRow } from "../components/RestaurantRow";
 import { cities, getRestaurant, search, TILES, type Tile } from "../lib/data";
+import { trackEvent } from "../lib/clarity";
 import { useStore } from "../lib/store";
 
 export function Dashboard() {
@@ -19,6 +20,7 @@ export function Dashboard() {
       picker.current?.focus();
       return;
     }
+    trackEvent(`tile_${tile.id}`);
     navigate(`/search?tile=${tile.id}`);
   }
 

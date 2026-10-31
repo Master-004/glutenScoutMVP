@@ -1,4 +1,5 @@
 import { precautionsFor, safetyFor, safetyStatus, shortDate, type Restaurant, type SafetyLevel } from "../lib/data";
+import { trackEvent } from "../lib/clarity";
 import { EvidenceIcon, Icons, Sheet } from "./ui";
 
 // Status is never color alone: each level has its own icon and words too.
@@ -43,7 +44,7 @@ export function SafetySheet({ restaurant, open, onClose }: { restaurant: Restaur
       open={open} onClose={onClose} title="Kitchen safety"
       footer={
         <div className="sheet-actions">
-          {callInFooter && <a className="button-secondary" href={`tel:+1${digits}`}>Call restaurant</a>}
+          {callInFooter && <a className="button-secondary" href={`tel:+1${digits}`} onClick={() => trackEvent("call_tapped")}>Call restaurant</a>}
           <button type="button" className="button" onClick={onClose}>OK</button>
         </div>
       }

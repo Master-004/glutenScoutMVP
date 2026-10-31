@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { trackEvent } from "../lib/clarity";
 
 // A short Scout clip over the app. It's on a white card because the videos have
 // white backgrounds, which would show as a box in dark mode. Always muted and
@@ -21,7 +22,7 @@ export function ScoutVideo({ src, caption, onDone }: { src: string; caption: str
       <div className="video-card">
         <video ref={video} src={src} muted playsInline autoPlay onEnded={onDone} onError={onDone} aria-hidden="true" />
         <p className="video-caption">{caption}</p>
-        <button ref={skip} type="button" className="video-skip" onClick={onDone}>Skip</button>
+        <button ref={skip} type="button" className="video-skip" onClick={() => { trackEvent("video_skipped"); onDone(); }}>Skip</button>
       </div>
     </div>
   );

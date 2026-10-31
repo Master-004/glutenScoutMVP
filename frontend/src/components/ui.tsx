@@ -123,7 +123,7 @@ export function MealRow({ meal, foodReviews }: { meal: Meal; foodReviews: Review
 export function ReviewItem({ review }: { review: Review }) {
   const tag = reviewerLabel(review.reviewerType);
   return (
-    <li className="review">
+    <li className="review" data-clarity-mask="true">
       <span className="avatar" aria-hidden="true">{review.author.charAt(0).toUpperCase()}</span>
       <div>
         <p className="review-meta"><strong>{review.author}</strong>{tag && <span className="reviewer-tag">{tag}</span>}</p>
@@ -131,7 +131,7 @@ export function ReviewItem({ review }: { review: Review }) {
           {review.rating > 0 && <Stars value={review.rating} label={`Food: ${review.rating} out of 5 stars`} />}
           <time dateTime={review.createdAt}>{shortDate(review.createdAt, true)}</time>
         </p>
-        <p className="review-body" data-clarity-mask="true">{review.body}</p>
+        <p className="review-body">{review.body}</p>
       </div>
     </li>
   );

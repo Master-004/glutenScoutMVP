@@ -1,8 +1,9 @@
-import { useCallback, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ScoutVideo } from "../components/ScoutVideo";
 import { GFBadge, Img, Rating, ReviewItem, Sheet } from "../components/ui";
 import { getMeal, getRestaurant, REVIEWER_TYPES, reviewerLabel, summarize, validateReview, type ReviewErrors } from "../lib/data";
+import { trackEvent } from "../lib/clarity";
 import { useStore } from "../lib/store";
 import { NotFound } from "./NotFound";
 import { BackLink } from "./Restaurant";
@@ -83,6 +84,8 @@ export function Meal() {
   const [photoNote, setPhotoNote] = useState(false);
   const finish = useCallback(() => setCelebrating(false), []);
   const meal = getMeal(Number(id));
+  // Reaching a meal is the task testers are timed on.
+  useEffect(() => { if (meal) trackEvent("meal_opened"); }, [meal]);
   const restaurant = meal && getRestaurant(meal.restaurantId);
   if (!meal || !restaurant) return <NotFound />;
 
@@ -134,6 +137,7 @@ export function Meal() {
         <ReviewForm
           onSubmit={(author, reviewerType, rating, body) => {
             addReview(meal.id, { author, reviewerType, rating, body });
+            trackEvent("review_posted");
             setWriting(false);
             setPosted(true);
             // The reward for reviewing, so nobody is made to wait for it.

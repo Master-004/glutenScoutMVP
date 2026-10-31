@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams, useLocation } from "reac
 import { SafetyButton, SafetySheet } from "../components/SafetySheet";
 import { GroupsLabel, Img, MealRow, Rating, Sheet, useRestaurantSummary } from "../components/ui";
 import { getRestaurant, mealsFor, photosFor, shortDate, type Meal, type Restaurant as R } from "../lib/data";
+import { trackEvent } from "../lib/clarity";
 import { useStore } from "../lib/store";
 import { NotFound } from "./NotFound";
 
@@ -84,7 +85,7 @@ export function Restaurant() {
     <>
       <BackLink fallback="/search" />
       <section className="identity">
-        <button type="button" className="identity-photo-button" onClick={() => setSheet("photos")} aria-label={`See photos of ${restaurant.name}`}>
+        <button type="button" className="identity-photo-button" onClick={() => { trackEvent("photos_opened"); setSheet("photos"); }} aria-label={`See photos of ${restaurant.name}`}>
           <Img className="identity-photo" src={photo?.url ?? ""} alt="" />
           <span className="identity-photo-label">Photos</span>
         </button>
@@ -93,14 +94,14 @@ export function Restaurant() {
           <Rating summary={summary} />
           <p className="meta">{restaurant.cuisine} · {restaurant.address}</p>
           <GroupsLabel restaurant={restaurant} />
-          <button type="button" className="save-button" aria-pressed={saved} onClick={() => toggleSaved(restaurant.id)}>
+          <button type="button" className="save-button" aria-pressed={saved} onClick={() => { if (!saved) trackEvent("restaurant_saved"); toggleSaved(restaurant.id); }}>
             {saved ? "Saved" : "Save"}
           </button>
         </div>
       </section>
       {summary.reviewCount === 0 && <p className="empty-note">No reviews yet. Be the first to review a meal here.</p>}
 
-      <SafetyButton restaurantId={restaurant.id} onClick={() => setSheet("safety")} />
+      <SafetyButton restaurantId={restaurant.id} onClick={() => { trackEvent("safety_sheet_opened"); setSheet("safety"); }} />
       <SafetySheet restaurant={restaurant} open={sheet === "safety"} onClose={() => setSheet(null)} />
       <PhotoSheet restaurant={restaurant} open={sheet === "photos"} onClose={() => setSheet(null)} />
 

@@ -1,5 +1,6 @@
 import { useCallback } from "react";
-import { NavLink, Outlet, ScrollRestoration } from "react-router-dom";
+import { Link, NavLink, Outlet, ScrollRestoration, useLocation } from "react-router-dom";
+import { clarityEnabled } from "../lib/clarity";
 import { useStore } from "../lib/store";
 import { ScoutVideo } from "./ScoutVideo";
 import { Start } from "./Start";
@@ -15,23 +16,27 @@ const TABS = [
 export function Layout() {
   const { videos, introSeen, started, markIntroSeen } = useStore();
   const finishIntro = useCallback(() => markIntroSeen(), [markIntroSeen]);
-  const playingIntro = videos && !introSeen;
+  const { pathname } = useLocation();
+  // The privacy page has to be readable before someone gets past the start screen.
+  const onPrivacy = pathname === "/privacy";
+  const playingIntro = videos && !introSeen && !onPrivacy;
   return (
     <div className={`app${started ? "" : " app-start"}`}>
-      {started ? <>
-      <nav className="tab-bar" aria-label="Main">
+      {started || onPrivacy ? <>
+      {started && <nav className="tab-bar" aria-label="Main">
         {TABS.map((t) => (
           <NavLink key={t.to} to={t.to} end={t.end} className="tab">
             {t.icon}<span>{t.label}</span>
           </NavLink>
         ))}
-      </nav>
+      </nav>}
       <main className="page">
         <Outlet />
       </main>
       </> : <Start ready={!playingIntro} />}
       <footer className="disclaimer">
         GlutenScout info comes from the community and may be out of date. Always confirm with the restaurant before ordering.
+        {clarityEnabled && <> We use Microsoft Clarity to see how this prototype is used. <Link to="/privacy">Privacy</Link></>}
       </footer>
       <ScrollRestoration />
       {playingIntro && (

@@ -3,7 +3,7 @@
 // and starts empty, which is what a real first-time user sees.
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { sampleReviews, type Review, type ReviewInput } from "./data";
-import { tagSession } from "./clarity";
+import { clarityEnabled, startClarity, stopClarity, tagSession } from "./clarity";
 
 export type Theme = "auto" | "light" | "dark";
 
@@ -17,10 +17,11 @@ interface Saved {
   introSeen: boolean;
   started: boolean; // has seen the first-time start screen
   reviewerType: string | null; // Celiac, Strict GF...: filled in on their reviews
+  recording: boolean; // allows Clarity, once it's turned on for the app
 }
 const EMPTY: Saved = {
   citySlug: null, savedRestaurants: [], upvotedMeals: [], myReviews: [], theme: "auto", videos: true, introSeen: false,
-  started: false, reviewerType: null,
+  started: false, reviewerType: null, recording: true,
 };
 const KEY = "glutenscout-prototype";
 
@@ -52,6 +53,7 @@ interface Store extends Saved {
   finishStart(reviewerType: string | null): void;
   setReviewerType(reviewerType: string | null): void;
   restart(): void;
+  setRecording(on: boolean): void;
   reset(): void;
   reviewsFor(mealId: number): Review[];
 }
@@ -72,7 +74,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (state.theme === "auto") document.documentElement.removeAttribute("data-theme");
     else document.documentElement.setAttribute("data-theme", state.theme);
   }, [state.theme]);
-  useEffect(() => tagSession("videos", state.videos ? "on" : "off"), [state.videos]);
+  // Recording starts only after the start screen, where people see the notice
+  // and pick a dietary option, so that choice is never part of a recording.
+  useEffect(() => {
+    if (!state.started || !state.recording) return;
+    startClarity();
+    tagSession("videos", state.videos ? "on" : "off");
+  }, [state.started, state.recording, state.videos]);
 
   const update = useCallback((change: (s: Saved) => Partial<Saved>) => {
     setState((s) => ({ ...s, ...change(s) }));
@@ -97,6 +105,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     finishStart: (reviewerType) => update(() => ({ started: true, reviewerType })),
     setReviewerType: (reviewerType) => update(() => ({ reviewerType })),
     restart: () => update(() => ({ introSeen: false, started: false })),
+    setRecording: (recording) => {
+      update(() => ({ recording }));
+      if (!recording && clarityEnabled) {
+        stopClarity();
+        // A fresh page guarantees the script is gone, once the choice is saved.
+        window.setTimeout(() => window.location.reload(), 50);
+      }
+    },
     reset: () => update((s) => ({ ...s, savedRestaurants: [], upvotedMeals: [], myReviews: [] })),
     // Newest first, with this visitor's own reviews included.
     reviewsFor: (mealId) => [...sampleReviews, ...state.myReviews]

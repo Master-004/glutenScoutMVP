@@ -10,9 +10,38 @@ npm run build
 ```
 
 - `?videos=off` on any test link turns Scout's videos off for that visitor, for comparing versions. Profile has the same switch.
-- Set `VITE_CLARITY_ID` in `.env` to turn on Microsoft Clarity. Tell testers they're being recorded first.
 - `node scripts/extend-sample.mjs` rebuilds the extra fictional sample data. It's only in this prototype, not the Go seed.
 - Dashboard tiles are the `TILES` list in `src/lib/data.ts`. They're a starting guess to validate.
+
+## Deploying on Vercel
+
+Set the project's root directory to `frontend`. `vercel.json` sends every page to the app, so links like `/restaurants/2` work on refresh.
+
+## Turning on Clarity
+
+Clarity stays off until `VITE_CLARITY_ID` is set. With no ID, the script never loads and no notice appears.
+
+**Before turning it on:**
+
+1. Read the [Clarity terms](https://clarity.microsoft.com/terms). This app asks about celiac disease, which is health-related, so confirm it's allowed.
+2. Review the draft wording in `src/pages/Privacy.tsx` and the notices on the start screen and footer.
+3. Make sure testers are 18 or older. Clarity shouldn't be used on anything aimed at under-18s.
+4. Tell testers they're being recorded when you invite them.
+
+**To turn it on:**
+
+1. Create a project at [clarity.microsoft.com](https://clarity.microsoft.com) and copy its project ID.
+2. In the Clarity project's masking settings, keep **Balanced** or stricter. The code masks reviews, forms and dietary choices on top of that.
+3. In Vercel, add `VITE_CLARITY_ID` as an environment variable, then redeploy. The ID is built in at deploy time.
+4. Run one test session and watch the recording. Confirm that review text, the review form and the Profile dietary choice are hidden. Masking changes can't be applied to past recordings, so do this before inviting testers.
+
+**What it records:**
+
+- It starts only after the start screen, so the dietary choice there is never recorded. People can turn it off in Profile.
+- Tag: `videos` (on or off), to compare versions with `?videos=off`.
+- Events: `tile_<id>`, `meal_opened`, `safety_sheet_opened`, `call_tapped`, `photos_opened`, `restaurant_saved`, `review_posted`, `video_skipped`.
+- Never add a reviewer type to a tag or event.
+- Page addresses are recorded, and they include search text (`?q=`).
 
 ## Known issues and later ideas
 

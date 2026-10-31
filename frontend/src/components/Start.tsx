@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
+import { clarityEnabled } from "../lib/clarity";
 import { REVIEWER_TYPES } from "../lib/data";
 import { useStore } from "../lib/store";
 
@@ -28,6 +30,11 @@ export function Start({ ready }: { ready: boolean }) {
           </li>
         ))}
       </ul>
+      {clarityEnabled && (
+        <p className="start-notice">
+          We use Microsoft Clarity to record how people use this prototype. What you type, reviews and this choice are hidden. <Link to="/privacy">Privacy</Link>
+        </p>
+      )}
       <button type="button" className="link-button start-skip" onClick={() => finishStart(null)}>Skip for now</button>
     </main>
   );
