@@ -85,6 +85,16 @@ func TestRestaurantListFoodTypeFilter(t *testing.T) {
 	}
 }
 
+func TestRestaurantBackLinkKeepsFilter(t *testing.T) {
+	h := newTestServer(t, seededStore())
+	if body := get(t, h, "/restaurants/10?type=salad").Body.String(); !strings.Contains(body, `href="/restaurants?city=provo-ut&type=salad#results"`) {
+		t.Error("back link should keep the food-type filter")
+	}
+	if body := get(t, h, "/restaurants/10").Body.String(); !strings.Contains(body, `href="/restaurants?city=provo-ut#results"`) {
+		t.Error("back link should have no filter when none is active")
+	}
+}
+
 func TestMealListFoodTypeFilter(t *testing.T) {
 	h := newTestServer(t, seededStore())
 
