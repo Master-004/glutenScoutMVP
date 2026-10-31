@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Breakfast">
+  <rect width="400" height="300" fill="#F4EDE4"/>
+  <ellipse cx="204" cy="158" rx="114" ry="112" fill="#E6DACB"/>
+  <circle cx="200" cy="150" r="112" fill="#FFFFFF"/>
+  <circle cx="200" cy="150" r="94" fill="none" stroke="#EFE7DC" stroke-width="3"/>
+  <g fill="#E8C07A"><circle cx="160" cy="175" r="16"/><circle cx="185" cy="195" r="15"/><circle cx="150" cy="140" r="14"/><circle cx="175" cy="155" r="13"/></g>
+  <g fill="#E0533D"><rect x="168" y="168" width="14" height="10" rx="3"/><rect x="140" y="160" width="12" height="9" rx="3"/></g>
+  <path d="M210 110 q40 -14 62 14 q14 30 -10 50 q-30 18 -56 -6 q-18 -30 4 -58z" fill="#FFFFFF" stroke="#E6DED3" stroke-width="3"/>
+  <circle cx="234" cy="140" r="17" fill="#F5B52E"/>
+  <circle cx="229" cy="135" r="5" fill="#F9D27A"/>
+</svg>

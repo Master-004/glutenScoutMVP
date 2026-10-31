@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Barbecue">
+  <rect width="400" height="300" fill="#F4EDE4"/>
+  <ellipse cx="204" cy="158" rx="114" ry="112" fill="#E6DACB"/>
+  <circle cx="200" cy="150" r="112" fill="#FFFFFF"/>
+  <circle cx="200" cy="150" r="94" fill="none" stroke="#EFE7DC" stroke-width="3"/>
+  <g fill="#7A3B22"><rect x="130" y="110" width="110" height="26" rx="10"/><rect x="138" y="140" width="104" height="26" rx="10"/><rect x="134" y="170" width="100" height="26" rx="10"/></g>
+  <g fill="#9C3D20"><rect x="130" y="110" width="110" height="8" rx="4"/><rect x="138" y="140" width="104" height="8" rx="4"/><rect x="134" y="170" width="100" height="8" rx="4"/></g>
+  <g fill="#C9E39B"><circle cx="270" cy="140" r="18"/><circle cx="262" cy="172" r="16"/></g>
+  <g fill="#8DBB55"><circle cx="276" cy="146" r="8"/><circle cx="258" cy="176" r="7"/></g>
+</svg>

@@ -1,0 +1,1346 @@
+{
+ "cities": [
+  {
+   "id": 3,
+   "name": "Denver",
+   "state": "CO",
+   "slug": "denver-co"
+  },
+  {
+   "id": 1,
+   "name": "Provo",
+   "state": "UT",
+   "slug": "provo-ut"
+  },
+  {
+   "id": 2,
+   "name": "Salt Lake City",
+   "state": "UT",
+   "slug": "salt-lake-city-ut"
+  }
+ ],
+ "restaurants": [
+  {
+   "id": 1,
+   "cityId": 1,
+   "name": "Canyon Hearth Pizza",
+   "address": "410 Timber Lane, Provo, UT",
+   "cuisine": "Pizza",
+   "description": "Wood-fired pizzeria with a dedicated gluten-free crust baked on separate trays.",
+   "phone": "(801) 555-0101",
+   "goodForGroups": true
+  },
+  {
+   "id": 2,
+   "cityId": 1,
+   "name": "Maple & Sage Kitchen",
+   "address": "88 Orchard Way, Provo, UT",
+   "cuisine": "American",
+   "description": "Farm-to-table comfort food with a clearly marked GF menu.",
+   "phone": "(801) 555-0102",
+   "goodForGroups": false
+  },
+  {
+   "id": 3,
+   "cityId": 1,
+   "name": "Little Lotus Pho",
+   "address": "1502 Riverbend Rd, Provo, UT",
+   "cuisine": "Vietnamese",
+   "description": "Rice-noodle soups and bowls, most naturally gluten-free.",
+   "phone": "(801) 555-0103",
+   "goodForGroups": false
+  },
+  {
+   "id": 4,
+   "cityId": 1,
+   "name": "Sunrise Taqueria",
+   "address": "77 Canyon View Dr, Provo, UT",
+   "cuisine": "Mexican",
+   "description": "Street tacos on corn tortillas made in house every morning.",
+   "phone": "(801) 555-0104",
+   "goodForGroups": true
+  },
+  {
+   "id": 5,
+   "cityId": 2,
+   "name": "Wasatch Grill House",
+   "address": "230 Summit Ave, Salt Lake City, UT",
+   "cuisine": "Steakhouse",
+   "description": "Steaks and seafood; staff are trained on GF orders.",
+   "phone": "(801) 555-0105",
+   "goodForGroups": true
+  },
+  {
+   "id": 6,
+   "cityId": 2,
+   "name": "Bella Rosa Trattoria",
+   "address": "915 Vine St, Salt Lake City, UT",
+   "cuisine": "Italian",
+   "description": "Family Italian spot offering GF pasta cooked in fresh water.",
+   "phone": "(801) 555-0106",
+   "goodForGroups": true
+  },
+  {
+   "id": 7,
+   "cityId": 2,
+   "name": "Saltbox Thai",
+   "address": "640 Harbor Loop, Salt Lake City, UT",
+   "cuisine": "Thai",
+   "description": "Thai curries and stir-fries made with GF tamari on request.",
+   "phone": "(801) 555-0107",
+   "goodForGroups": false
+  },
+  {
+   "id": 8,
+   "cityId": 2,
+   "name": "Green Fork Cafe",
+   "address": "12 Linden Ct, Salt Lake City, UT",
+   "cuisine": "Cafe",
+   "description": "Bright cafe with GF breakfast all day and baked goods.",
+   "phone": "(801) 555-0108",
+   "goodForGroups": false
+  },
+  {
+   "id": 9,
+   "cityId": 2,
+   "name": "Beehive Burger Co.",
+   "address": "3301 Honeycomb Blvd, Salt Lake City, UT",
+   "cuisine": "Burgers",
+   "description": "Smash burgers with GF buns and a dedicated fryer for fries.",
+   "phone": "(801) 555-0109",
+   "goodForGroups": true
+  },
+  {
+   "id": 10,
+   "cityId": 3,
+   "name": "Mile Marker Tacos",
+   "address": "5280 Aspen St, Denver, CO",
+   "cuisine": "Mexican",
+   "description": "Colorful taco shop with corn tortillas and GF salsas.",
+   "phone": "",
+   "goodForGroups": false
+  },
+  {
+   "id": 11,
+   "cityId": 3,
+   "name": "Rocky Ridge BBQ",
+   "address": "1900 Smokehouse Ln, Denver, CO",
+   "cuisine": "Barbecue",
+   "description": "Slow-smoked meats with sauces made without wheat.",
+   "phone": "(303) 555-0111",
+   "goodForGroups": true
+  },
+  {
+   "id": 12,
+   "cityId": 3,
+   "name": "Saffron Garden",
+   "address": "742 Juniper Ave, Denver, CO",
+   "cuisine": "Indian",
+   "description": "North Indian curries; most dishes are naturally gluten-free.",
+   "phone": "(303) 555-0112",
+   "goodForGroups": true
+  },
+  {
+   "id": 13,
+   "cityId": 1,
+   "name": "Cluck Shack",
+   "address": "1 Featherstone Way, Provo, UT",
+   "cuisine": "Fried chicken",
+   "description": "Fried chicken counter. Most items are breaded; ask about the grilled options.",
+   "phone": "(801) 555-0113",
+   "goodForGroups": true
+  }
+ ],
+ "meals": [
+  {
+   "id": 1,
+   "restaurantId": 1,
+   "name": "GF Margherita Pizza",
+   "description": "Tomato, fresh mozzarella, and basil on a crisp GF crust.",
+   "photo": "/images/meals/pizza.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "grain"
+  },
+  {
+   "id": 2,
+   "restaurantId": 1,
+   "name": "GF Pepperoni Pizza",
+   "description": "Classic pepperoni on the house GF crust.",
+   "photo": "/images/meals/pizza.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "grain"
+  },
+  {
+   "id": 3,
+   "restaurantId": 1,
+   "name": "Harvest Salad",
+   "description": "Greens, roasted squash, pepitas, and maple vinaigrette.",
+   "photo": "/images/meals/salad.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "salad"
+  },
+  {
+   "id": 4,
+   "restaurantId": 2,
+   "name": "Roast Chicken Plate",
+   "description": "Half chicken with herb potatoes and seasonal vegetables.",
+   "photo": "/images/meals/chicken.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 5,
+   "restaurantId": 2,
+   "name": "Steak and Eggs",
+   "description": "Grilled sirloin, two eggs, and crispy breakfast potatoes.",
+   "photo": "/images/meals/steak.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 6,
+   "restaurantId": 2,
+   "name": "Sweet Potato Hash",
+   "description": "Sweet potato, peppers, onions, and a fried egg.",
+   "photo": "/images/meals/breakfast.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 7,
+   "restaurantId": 2,
+   "name": "Flourless Chocolate Cake",
+   "description": "Rich, fudgy cake with whipped cream.",
+   "photo": "/images/meals/dessert.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "dessert"
+  },
+  {
+   "id": 8,
+   "restaurantId": 3,
+   "name": "Beef Pho",
+   "description": "Rice noodles in slow-simmered beef broth with herbs.",
+   "photo": "/images/meals/soup.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "grain"
+  },
+  {
+   "id": 9,
+   "restaurantId": 3,
+   "name": "Lemongrass Chicken Bowl",
+   "description": "Grilled chicken over rice with pickled vegetables.",
+   "photo": "/images/meals/bowl.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "grain"
+  },
+  {
+   "id": 10,
+   "restaurantId": 3,
+   "name": "Fresh Spring Rolls",
+   "description": "Rice paper rolls with shrimp and a GF peanut sauce.",
+   "photo": "/images/meals/rolls.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 11,
+   "restaurantId": 4,
+   "name": "Carne Asada Tacos",
+   "description": "Grilled steak on corn tortillas with onion and cilantro.",
+   "photo": "/images/meals/taco.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 12,
+   "restaurantId": 4,
+   "name": "Al Pastor Tacos",
+   "description": "Marinated pork and pineapple on corn tortillas.",
+   "photo": "/images/meals/taco.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 13,
+   "restaurantId": 4,
+   "name": "Chicken Burrito Bowl",
+   "description": "Rice, black beans, chicken, salsa, and guacamole.",
+   "photo": "/images/meals/bowl.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "grain"
+  },
+  {
+   "id": 14,
+   "restaurantId": 5,
+   "name": "Ribeye Steak",
+   "description": "14 oz ribeye with garlic mashed potatoes.",
+   "photo": "/images/meals/steak.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 15,
+   "restaurantId": 5,
+   "name": "Cedar Plank Salmon",
+   "description": "Salmon with lemon butter and grilled asparagus.",
+   "photo": "/images/meals/fish.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 16,
+   "restaurantId": 5,
+   "name": "Wedge Salad",
+   "description": "Iceberg, bacon, tomato, and GF blue cheese dressing.",
+   "photo": "/images/meals/salad.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "salad"
+  },
+  {
+   "id": 17,
+   "restaurantId": 5,
+   "name": "Creme Brulee",
+   "description": "Vanilla custard with a torched sugar top.",
+   "photo": "/images/meals/dessert.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "dessert"
+  },
+  {
+   "id": 18,
+   "restaurantId": 6,
+   "name": "GF Spaghetti Bolognese",
+   "description": "GF spaghetti with slow-cooked meat sauce.",
+   "photo": "/images/meals/pasta.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "grain"
+  },
+  {
+   "id": 19,
+   "restaurantId": 6,
+   "name": "GF Penne Primavera",
+   "description": "GF penne with seasonal vegetables and olive oil.",
+   "photo": "/images/meals/pasta.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "grain"
+  },
+  {
+   "id": 20,
+   "restaurantId": 6,
+   "name": "Chicken Piccata",
+   "description": "Pan-seared chicken with lemon caper sauce, dusted in rice flour.",
+   "photo": "/images/meals/chicken.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 21,
+   "restaurantId": 6,
+   "name": "Risotto ai Funghi",
+   "description": "Creamy arborio rice with wild mushrooms.",
+   "photo": "/images/meals/bowl.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "grain"
+  },
+  {
+   "id": 22,
+   "restaurantId": 7,
+   "name": "Pad Thai",
+   "description": "Rice noodles with egg, peanuts, and GF tamari sauce.",
+   "photo": "/images/meals/noodles.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "grain"
+  },
+  {
+   "id": 23,
+   "restaurantId": 7,
+   "name": "Green Curry",
+   "description": "Coconut green curry with vegetables and jasmine rice.",
+   "photo": "/images/meals/curry.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 24,
+   "restaurantId": 7,
+   "name": "Mango Sticky Rice",
+   "description": "Sweet coconut sticky rice with ripe mango.",
+   "photo": "/images/meals/dessert.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "dessert"
+  },
+  {
+   "id": 25,
+   "restaurantId": 8,
+   "name": "GF Pancake Stack",
+   "description": "Three fluffy GF pancakes with berries and syrup.",
+   "photo": "/images/meals/breakfast.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "grain"
+  },
+  {
+   "id": 26,
+   "restaurantId": 8,
+   "name": "Avocado Toast on GF Bread",
+   "description": "Smashed avocado, chili flakes, and a poached egg.",
+   "photo": "/images/meals/sandwich.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "grain"
+  },
+  {
+   "id": 27,
+   "restaurantId": 8,
+   "name": "Quinoa Power Bowl",
+   "description": "Quinoa, kale, chickpeas, and tahini dressing.",
+   "photo": "/images/meals/bowl.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "grain"
+  },
+  {
+   "id": 28,
+   "restaurantId": 8,
+   "name": "GF Blueberry Muffin",
+   "description": "Baked daily in a dedicated GF batch.",
+   "photo": "/images/meals/dessert.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "dessert"
+  },
+  {
+   "id": 29,
+   "restaurantId": 9,
+   "name": "Classic Smash Burger",
+   "description": "Double patty and cheese on a GF bun.",
+   "photo": "/images/meals/burger.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 30,
+   "restaurantId": 9,
+   "name": "Bacon Jam Burger",
+   "description": "Smash burger with bacon jam on a GF bun.",
+   "photo": "/images/meals/burger.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 31,
+   "restaurantId": 9,
+   "name": "Dedicated-Fryer Fries",
+   "description": "Hand-cut fries from a fryer used only for potatoes.",
+   "photo": "/images/meals/fries.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 32,
+   "restaurantId": 10,
+   "name": "Fish Tacos",
+   "description": "Grilled white fish, slaw, and chipotle crema on corn.",
+   "photo": "/images/meals/taco.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 33,
+   "restaurantId": 10,
+   "name": "Barbacoa Tacos",
+   "description": "Braised beef on corn tortillas with salsa verde.",
+   "photo": "/images/meals/taco.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 34,
+   "restaurantId": 10,
+   "name": "Elote Bowl",
+   "description": "Street corn, cotija, lime, and chili over rice.",
+   "photo": "/images/meals/bowl.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "grain"
+  },
+  {
+   "id": 35,
+   "restaurantId": 11,
+   "name": "Brisket Plate",
+   "description": "Smoked brisket with coleslaw and pickles.",
+   "photo": "/images/meals/bbq.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 36,
+   "restaurantId": 11,
+   "name": "Pulled Pork Plate",
+   "description": "Pulled pork with GF barbecue sauce and beans.",
+   "photo": "/images/meals/bbq.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 37,
+   "restaurantId": 11,
+   "name": "Smoked Half Chicken",
+   "description": "Dry-rubbed chicken smoked over hickory.",
+   "photo": "/images/meals/chicken.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 38,
+   "restaurantId": 11,
+   "name": "Loaded Baked Potato",
+   "description": "Baked potato with brisket, cheese, and sour cream.",
+   "photo": "/images/meals/fries.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 39,
+   "restaurantId": 12,
+   "name": "Chicken Tikka Masala",
+   "description": "Tandoori chicken in a creamy tomato sauce with basmati rice.",
+   "photo": "/images/meals/curry.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 40,
+   "restaurantId": 12,
+   "name": "Chana Masala",
+   "description": "Spiced chickpea curry, vegan and naturally GF.",
+   "photo": "/images/meals/curry.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 41,
+   "restaurantId": 12,
+   "name": "Lamb Rogan Josh",
+   "description": "Slow-braised lamb in an aromatic Kashmiri sauce.",
+   "photo": "/images/meals/curry.svg",
+   "gfStatus": "gf",
+   "gfNote": "",
+   "foodType": "entree"
+  },
+  {
+   "id": 42,
+   "restaurantId": 13,
+   "name": "Fried Chicken Sandwich",
+   "description": "Buttermilk fried chicken, pickles, and slaw on a brioche bun.",
+   "photo": "/images/meals/sandwich.svg",
+   "gfStatus": "contains",
+   "gfNote": "Wheat-flour breading and a wheat bun.",
+   "foodType": "grain"
+  },
+  {
+   "id": 43,
+   "restaurantId": 13,
+   "name": "Chicken Tenders",
+   "description": "Hand-breaded tenders with honey mustard.",
+   "photo": "/images/meals/chicken.svg",
+   "gfStatus": "contains",
+   "gfNote": "Wheat-flour breading.",
+   "foodType": "entree"
+  },
+  {
+   "id": 44,
+   "restaurantId": 13,
+   "name": "Mac and Cheese",
+   "description": "Baked elbow macaroni with cheddar.",
+   "photo": "/images/meals/pasta.svg",
+   "gfStatus": "contains",
+   "gfNote": "Made with wheat pasta.",
+   "foodType": "grain"
+  },
+  {
+   "id": 45,
+   "restaurantId": 13,
+   "name": "Seasoned Fries",
+   "description": "Skin-on fries with house seasoning.",
+   "photo": "/images/meals/fries.svg",
+   "gfStatus": "cross_contact",
+   "gfNote": "Potatoes only, but fried in the same oil as the breaded chicken.",
+   "foodType": "entree"
+  },
+  {
+   "id": 46,
+   "restaurantId": 13,
+   "name": "Grilled Chicken Salad",
+   "description": "Grilled chicken, greens, tomato, and ranch.",
+   "photo": "/images/meals/salad.svg",
+   "gfStatus": "gf",
+   "gfNote": "Order without croutons; the ranch is made without wheat.",
+   "foodType": "salad"
+  },
+  {
+   "id": 47,
+   "restaurantId": 1,
+   "name": "Garlic Knots",
+   "description": "Knotted dough with garlic butter and parmesan.",
+   "photo": "/images/meals/bread.svg",
+   "gfStatus": "contains",
+   "gfNote": "Made with regular wheat dough.",
+   "foodType": "grain"
+  },
+  {
+   "id": 48,
+   "restaurantId": 3,
+   "name": "Crispy Egg Rolls",
+   "description": "Pork and cabbage egg rolls with sweet chili sauce.",
+   "photo": "/images/meals/rolls.svg",
+   "gfStatus": "contains",
+   "gfNote": "Wheat wrappers.",
+   "foodType": "entree"
+  },
+  {
+   "id": 49,
+   "restaurantId": 4,
+   "name": "Chips and Salsa",
+   "description": "House corn chips with roasted salsa.",
+   "photo": "/images/meals/taco.svg",
+   "gfStatus": "cross_contact",
+   "gfNote": "Corn chips, but fried in a fryer shared with flour items.",
+   "foodType": "entree"
+  },
+  {
+   "id": 50,
+   "restaurantId": 4,
+   "name": "Flour Tortilla Quesadilla",
+   "description": "Melted cheese and chicken in a flour tortilla.",
+   "photo": "/images/meals/taco.svg",
+   "gfStatus": "contains",
+   "gfNote": "Flour tortilla.",
+   "foodType": "grain"
+  },
+  {
+   "id": 51,
+   "restaurantId": 5,
+   "name": "Beer-Battered Onion Rings",
+   "description": "Thick-cut onion rings.",
+   "photo": "/images/meals/fries.svg",
+   "gfStatus": "contains",
+   "gfNote": "Beer batter contains wheat and barley.",
+   "foodType": "entree"
+  },
+  {
+   "id": 52,
+   "restaurantId": 6,
+   "name": "Fettuccine Alfredo",
+   "description": "Fettuccine in a parmesan cream sauce.",
+   "photo": "/images/meals/pasta.svg",
+   "gfStatus": "contains",
+   "gfNote": "Regular wheat pasta. Ask for GF penne instead.",
+   "foodType": "grain"
+  },
+  {
+   "id": 53,
+   "restaurantId": 6,
+   "name": "Garlic Bread",
+   "description": "Toasted Italian bread with garlic butter.",
+   "photo": "/images/meals/bread.svg",
+   "gfStatus": "contains",
+   "gfNote": "Wheat bread.",
+   "foodType": "grain"
+  },
+  {
+   "id": 54,
+   "restaurantId": 9,
+   "name": "Onion Ring Tower",
+   "description": "Stacked beer-battered onion rings.",
+   "photo": "/images/meals/fries.svg",
+   "gfStatus": "contains",
+   "gfNote": "Beer batter; fried in a separate fryer from the fries.",
+   "foodType": "entree"
+  },
+  {
+   "id": 55,
+   "restaurantId": 11,
+   "name": "Cornbread",
+   "description": "Sweet skillet cornbread with honey butter.",
+   "photo": "/images/meals/breakfast.svg",
+   "gfStatus": "contains",
+   "gfNote": "Made with wheat flour and cornmeal.",
+   "foodType": "grain"
+  },
+  {
+   "id": 56,
+   "restaurantId": 11,
+   "name": "Fried Okra",
+   "description": "Cornmeal-crusted okra.",
+   "photo": "/images/meals/fries.svg",
+   "gfStatus": "cross_contact",
+   "gfNote": "Cornmeal breading, but fried with breaded items.",
+   "foodType": "entree"
+  },
+  {
+   "id": 57,
+   "restaurantId": 12,
+   "name": "Garlic Naan",
+   "description": "Tandoor-baked flatbread with garlic.",
+   "photo": "/images/meals/bread.svg",
+   "gfStatus": "contains",
+   "gfNote": "Wheat flour.",
+   "foodType": "grain"
+  },
+  {
+   "id": 58,
+   "restaurantId": 12,
+   "name": "Vegetable Pakoras",
+   "description": "Spiced vegetable fritters.",
+   "photo": "/images/meals/curry.svg",
+   "gfStatus": "cross_contact",
+   "gfNote": "Chickpea-flour batter, but fried in shared oil.",
+   "foodType": "entree"
+  },
+  {
+   "id": 59,
+   "restaurantId": 13,
+   "name": "Chocolate Chip Cookie",
+   "description": "Warm, chewy cookie baked in house.",
+   "photo": "/images/meals/dessert.svg",
+   "gfStatus": "contains",
+   "gfNote": "Made with wheat flour.",
+   "foodType": "dessert"
+  }
+ ],
+ "reviews": [
+  {
+   "id": 6,
+   "mealId": 1,
+   "author": "GrubbyPanda",
+   "body": "I loved this pizza. My honest opinion is that the crust was a little dense, but not the worst gf pizza crust I've had.",
+   "reviewerType": "",
+   "rating": 0,
+   "createdAt": "2026-09-26T19:33:27.604764+00:00"
+  },
+  {
+   "id": 7,
+   "mealId": 2,
+   "author": "GrubbyPanda",
+   "body": "Great pizza, but I had stomach issues after eating here",
+   "reviewerType": "",
+   "rating": 0,
+   "createdAt": "2026-09-26T19:37:40.304278+00:00"
+  },
+  {
+   "id": 1001,
+   "mealId": 1,
+   "author": "Maya R.",
+   "body": "Told the server I'm celiac. The cook came out, changed gloves and used a separate tray. Crust was crisp and chewy.",
+   "reviewerType": "celiac",
+   "rating": 5,
+   "createdAt": "2026-09-12T19:10:00+00:00"
+  },
+  {
+   "id": 1002,
+   "mealId": 1,
+   "author": "Devon",
+   "body": "Good pie. I asked about the oven and got two different answers from staff, so I'd call ahead.",
+   "reviewerType": "strict",
+   "rating": 4,
+   "createdAt": "2026-09-03T18:00:00+00:00"
+  },
+  {
+   "id": 1003,
+   "mealId": 2,
+   "author": "Priya K.",
+   "body": "Pepperoni was great. GF crust is a little dense but tasty.",
+   "reviewerType": "sensitive",
+   "rating": 4,
+   "createdAt": "2026-08-28T20:30:00+00:00"
+  },
+  {
+   "id": 1004,
+   "mealId": 3,
+   "author": "Sam",
+   "body": "Simple and fresh. They brought the dressing on the side when I asked.",
+   "reviewerType": "celiac",
+   "rating": 4,
+   "createdAt": "2026-09-08T12:15:00+00:00"
+  },
+  {
+   "id": 1005,
+   "mealId": 8,
+   "author": "Lin",
+   "body": "Broth was rich. One server said the noodle baskets are shared; another said they have separate ones.",
+   "reviewerType": "celiac",
+   "rating": 3,
+   "createdAt": "2026-07-02T13:00:00+00:00"
+  },
+  {
+   "id": 1006,
+   "mealId": 29,
+   "author": "Jordan",
+   "body": "Bun held together well. Staff knew exactly what I meant by cross-contact.",
+   "reviewerType": "strict",
+   "rating": 5,
+   "createdAt": "2026-09-22T18:45:00+00:00"
+  },
+  {
+   "id": 1007,
+   "mealId": 31,
+   "author": "Alex T.",
+   "body": "Fries come from a fryer used only for potatoes. They confirmed it without me pushing.",
+   "reviewerType": "celiac",
+   "rating": 5,
+   "createdAt": "2026-09-20T19:30:00+00:00"
+  },
+  {
+   "id": 1008,
+   "mealId": 31,
+   "author": "Beehive Burger Co.",
+   "body": "Our fryer is used only for potatoes, and we filter the oil daily.",
+   "reviewerType": "restaurant",
+   "rating": 0,
+   "createdAt": "2026-09-01T10:00:00+00:00"
+  },
+  {
+   "id": 1009,
+   "mealId": 25,
+   "author": "Riley",
+   "body": "Fluffy pancakes, and the toaster for GF bread is labeled.",
+   "reviewerType": "sensitive",
+   "rating": 5,
+   "createdAt": "2026-09-25T09:20:00+00:00"
+  },
+  {
+   "id": 1010,
+   "mealId": 39,
+   "author": "Nadia",
+   "body": "Delicious. I skipped the naan since they weren't sure about the tandoor.",
+   "reviewerType": "celiac",
+   "rating": 4,
+   "createdAt": "2026-09-02T19:00:00+00:00"
+  },
+  {
+   "id": 1011,
+   "mealId": 46,
+   "author": "Chris B.",
+   "body": "Grilled chicken was juicy. They left the croutons off without me asking twice.",
+   "reviewerType": "strict",
+   "rating": 4,
+   "createdAt": "2026-09-15T12:30:00+00:00"
+  },
+  {
+   "id": 1012,
+   "mealId": 45,
+   "author": "Morgan",
+   "body": "Great fries, but the cashier confirmed they share oil with the breaded chicken, so I passed.",
+   "reviewerType": "celiac",
+   "rating": 3,
+   "createdAt": "2026-09-10T18:10:00+00:00"
+  }
+ ],
+ "safetyProfiles": [
+  {
+   "restaurantId": 1,
+   "verifiedOn": "2026-09-12",
+   "answersUpdatedOn": "2026-08-30",
+   "conflictNote": "2 reports disagree about whether GF pizzas bake in the same oven as regular pizzas."
+  },
+  {
+   "restaurantId": 2,
+   "verifiedOn": "2026-09-20",
+   "answersUpdatedOn": "2026-09-01",
+   "conflictNote": ""
+  },
+  {
+   "restaurantId": 3,
+   "verifiedOn": "2026-07-02",
+   "answersUpdatedOn": "2026-06-15",
+   "conflictNote": "Reports disagree about whether rice noodles are cooked in baskets also used for wheat noodles."
+  },
+  {
+   "restaurantId": 4,
+   "verifiedOn": "2026-09-05",
+   "answersUpdatedOn": "2026-08-20",
+   "conflictNote": "2 reports disagree about whether tortilla chips share a fryer with flour items."
+  },
+  {
+   "restaurantId": 5,
+   "verifiedOn": "2026-09-18",
+   "answersUpdatedOn": "2026-09-10",
+   "conflictNote": ""
+  },
+  {
+   "restaurantId": 6,
+   "verifiedOn": "2026-09-08",
+   "answersUpdatedOn": "2026-08-25",
+   "conflictNote": ""
+  },
+  {
+   "restaurantId": 7,
+   "verifiedOn": "2026-04-10",
+   "answersUpdatedOn": "2026-04-10",
+   "conflictNote": ""
+  },
+  {
+   "restaurantId": 8,
+   "verifiedOn": "2026-09-25",
+   "answersUpdatedOn": "2026-09-15",
+   "conflictNote": ""
+  },
+  {
+   "restaurantId": 9,
+   "verifiedOn": "2026-09-22",
+   "answersUpdatedOn": "2026-09-01",
+   "conflictNote": "1 report says GF buns were toasted on the shared grill; the restaurant says they use a separate pan."
+  },
+  {
+   "restaurantId": 11,
+   "verifiedOn": "2026-08-14",
+   "answersUpdatedOn": "2026-08-01",
+   "conflictNote": ""
+  },
+  {
+   "restaurantId": 12,
+   "verifiedOn": "2026-09-02",
+   "answersUpdatedOn": "2026-08-18",
+   "conflictNote": "Reports disagree about whether naan and tandoori dishes share the tandoor."
+  },
+  {
+   "restaurantId": 13,
+   "verifiedOn": "2026-09-15",
+   "answersUpdatedOn": null,
+   "conflictNote": ""
+  }
+ ],
+ "precautions": [
+  {
+   "restaurantId": 1,
+   "label": "Separate prep area",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 1,
+   "label": "Separate pizza trays",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 1,
+   "label": "Gloves changed",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 1,
+   "label": "Shared oven?",
+   "status": "conflict"
+  },
+  {
+   "restaurantId": 2,
+   "label": "Separate prep area",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 2,
+   "label": "Clean utensils",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 2,
+   "label": "Dedicated toaster",
+   "status": "unverified"
+  },
+  {
+   "restaurantId": 3,
+   "label": "Rice noodles only",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 3,
+   "label": "Shared noodle baskets?",
+   "status": "conflict"
+  },
+  {
+   "restaurantId": 3,
+   "label": "GF hoisin on request",
+   "status": "unverified"
+  },
+  {
+   "restaurantId": 4,
+   "label": "Corn tortillas made in house",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 4,
+   "label": "Shared fryer?",
+   "status": "conflict"
+  },
+  {
+   "restaurantId": 5,
+   "label": "Staff trained on GF orders",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 5,
+   "label": "Gloves changed",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 5,
+   "label": "Separate prep area",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 6,
+   "label": "GF pasta in fresh water",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 6,
+   "label": "Separate pots",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 6,
+   "label": "Separate colander",
+   "status": "unverified"
+  },
+  {
+   "restaurantId": 7,
+   "label": "GF tamari on request",
+   "status": "unverified"
+  },
+  {
+   "restaurantId": 7,
+   "label": "Clean wok between orders",
+   "status": "unverified"
+  },
+  {
+   "restaurantId": 8,
+   "label": "Dedicated GF baking batch",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 8,
+   "label": "Dedicated toaster",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 8,
+   "label": "Separate prep area",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 9,
+   "label": "Dedicated fryer",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 9,
+   "label": "GF buns stored separately",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 9,
+   "label": "Shared grill?",
+   "status": "conflict"
+  },
+  {
+   "restaurantId": 11,
+   "label": "Sauces made without wheat",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 11,
+   "label": "Separate cutting boards",
+   "status": "unverified"
+  },
+  {
+   "restaurantId": 12,
+   "label": "No wheat thickeners",
+   "status": "confirmed"
+  },
+  {
+   "restaurantId": 12,
+   "label": "Shared tandoor?",
+   "status": "conflict"
+  },
+  {
+   "restaurantId": 13,
+   "label": "Dedicated fryer",
+   "status": "unverified"
+  },
+  {
+   "restaurantId": 13,
+   "label": "Separate prep area",
+   "status": "unverified"
+  }
+ ],
+ "photos": [
+  {
+   "restaurantId": 1,
+   "kind": "food",
+   "url": "/images/meals/pizza.svg",
+   "alt": "Illustration of GF Margherita Pizza"
+  },
+  {
+   "restaurantId": 1,
+   "kind": "prep",
+   "url": "/images/places/prep-1.svg",
+   "alt": "Illustration of the prep area at Canyon Hearth Pizza"
+  },
+  {
+   "restaurantId": 1,
+   "kind": "storefront",
+   "url": "/images/places/storefront-2.svg",
+   "alt": "Illustration of the outside of Canyon Hearth Pizza"
+  },
+  {
+   "restaurantId": 2,
+   "kind": "food",
+   "url": "/images/meals/chicken.svg",
+   "alt": "Illustration of Roast Chicken Plate"
+  },
+  {
+   "restaurantId": 2,
+   "kind": "prep",
+   "url": "/images/places/prep-2.svg",
+   "alt": "Illustration of the prep area at Maple & Sage Kitchen"
+  },
+  {
+   "restaurantId": 2,
+   "kind": "storefront",
+   "url": "/images/places/storefront-1.svg",
+   "alt": "Illustration of the outside of Maple & Sage Kitchen"
+  },
+  {
+   "restaurantId": 3,
+   "kind": "food",
+   "url": "/images/meals/soup.svg",
+   "alt": "Illustration of Beef Pho"
+  },
+  {
+   "restaurantId": 3,
+   "kind": "prep",
+   "url": "/images/places/prep-1.svg",
+   "alt": "Illustration of the prep area at Little Lotus Pho"
+  },
+  {
+   "restaurantId": 3,
+   "kind": "storefront",
+   "url": "/images/places/storefront-2.svg",
+   "alt": "Illustration of the outside of Little Lotus Pho"
+  },
+  {
+   "restaurantId": 4,
+   "kind": "food",
+   "url": "/images/meals/taco.svg",
+   "alt": "Illustration of Carne Asada Tacos"
+  },
+  {
+   "restaurantId": 4,
+   "kind": "prep",
+   "url": "/images/places/prep-2.svg",
+   "alt": "Illustration of the prep area at Sunrise Taqueria"
+  },
+  {
+   "restaurantId": 4,
+   "kind": "storefront",
+   "url": "/images/places/storefront-1.svg",
+   "alt": "Illustration of the outside of Sunrise Taqueria"
+  },
+  {
+   "restaurantId": 5,
+   "kind": "food",
+   "url": "/images/meals/steak.svg",
+   "alt": "Illustration of Ribeye Steak"
+  },
+  {
+   "restaurantId": 5,
+   "kind": "prep",
+   "url": "/images/places/prep-1.svg",
+   "alt": "Illustration of the prep area at Wasatch Grill House"
+  },
+  {
+   "restaurantId": 5,
+   "kind": "storefront",
+   "url": "/images/places/storefront-2.svg",
+   "alt": "Illustration of the outside of Wasatch Grill House"
+  },
+  {
+   "restaurantId": 6,
+   "kind": "food",
+   "url": "/images/meals/pasta.svg",
+   "alt": "Illustration of GF Spaghetti Bolognese"
+  },
+  {
+   "restaurantId": 6,
+   "kind": "prep",
+   "url": "/images/places/prep-2.svg",
+   "alt": "Illustration of the prep area at Bella Rosa Trattoria"
+  },
+  {
+   "restaurantId": 6,
+   "kind": "storefront",
+   "url": "/images/places/storefront-1.svg",
+   "alt": "Illustration of the outside of Bella Rosa Trattoria"
+  },
+  {
+   "restaurantId": 7,
+   "kind": "food",
+   "url": "/images/meals/noodles.svg",
+   "alt": "Illustration of Pad Thai"
+  },
+  {
+   "restaurantId": 7,
+   "kind": "prep",
+   "url": "/images/places/prep-1.svg",
+   "alt": "Illustration of the prep area at Saltbox Thai"
+  },
+  {
+   "restaurantId": 7,
+   "kind": "storefront",
+   "url": "/images/places/storefront-2.svg",
+   "alt": "Illustration of the outside of Saltbox Thai"
+  },
+  {
+   "restaurantId": 8,
+   "kind": "food",
+   "url": "/images/meals/breakfast.svg",
+   "alt": "Illustration of GF Pancake Stack"
+  },
+  {
+   "restaurantId": 8,
+   "kind": "prep",
+   "url": "/images/places/prep-2.svg",
+   "alt": "Illustration of the prep area at Green Fork Cafe"
+  },
+  {
+   "restaurantId": 8,
+   "kind": "storefront",
+   "url": "/images/places/storefront-1.svg",
+   "alt": "Illustration of the outside of Green Fork Cafe"
+  },
+  {
+   "restaurantId": 9,
+   "kind": "food",
+   "url": "/images/meals/burger.svg",
+   "alt": "Illustration of Classic Smash Burger"
+  },
+  {
+   "restaurantId": 9,
+   "kind": "prep",
+   "url": "/images/places/prep-1.svg",
+   "alt": "Illustration of the prep area at Beehive Burger Co."
+  },
+  {
+   "restaurantId": 9,
+   "kind": "storefront",
+   "url": "/images/places/storefront-2.svg",
+   "alt": "Illustration of the outside of Beehive Burger Co."
+  },
+  {
+   "restaurantId": 10,
+   "kind": "food",
+   "url": "/images/meals/taco.svg",
+   "alt": "Illustration of Fish Tacos"
+  },
+  {
+   "restaurantId": 10,
+   "kind": "prep",
+   "url": "/images/places/prep-2.svg",
+   "alt": "Illustration of the prep area at Mile Marker Tacos"
+  },
+  {
+   "restaurantId": 10,
+   "kind": "storefront",
+   "url": "/images/places/storefront-1.svg",
+   "alt": "Illustration of the outside of Mile Marker Tacos"
+  },
+  {
+   "restaurantId": 11,
+   "kind": "food",
+   "url": "/images/meals/bbq.svg",
+   "alt": "Illustration of Brisket Plate"
+  },
+  {
+   "restaurantId": 11,
+   "kind": "prep",
+   "url": "/images/places/prep-1.svg",
+   "alt": "Illustration of the prep area at Rocky Ridge BBQ"
+  },
+  {
+   "restaurantId": 11,
+   "kind": "storefront",
+   "url": "/images/places/storefront-2.svg",
+   "alt": "Illustration of the outside of Rocky Ridge BBQ"
+  },
+  {
+   "restaurantId": 12,
+   "kind": "food",
+   "url": "/images/meals/curry.svg",
+   "alt": "Illustration of Chicken Tikka Masala"
+  },
+  {
+   "restaurantId": 12,
+   "kind": "prep",
+   "url": "/images/places/prep-2.svg",
+   "alt": "Illustration of the prep area at Saffron Garden"
+  },
+  {
+   "restaurantId": 12,
+   "kind": "storefront",
+   "url": "/images/places/storefront-1.svg",
+   "alt": "Illustration of the outside of Saffron Garden"
+  },
+  {
+   "restaurantId": 13,
+   "kind": "food",
+   "url": "/images/meals/salad.svg",
+   "alt": "Illustration of Grilled Chicken Salad"
+  },
+  {
+   "restaurantId": 13,
+   "kind": "prep",
+   "url": "/images/places/prep-1.svg",
+   "alt": "Illustration of the prep area at Cluck Shack"
+  },
+  {
+   "restaurantId": 13,
+   "kind": "storefront",
+   "url": "/images/places/storefront-2.svg",
+   "alt": "Illustration of the outside of Cluck Shack"
+  }
+ ]
+}

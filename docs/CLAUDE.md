@@ -62,5 +62,8 @@ glutenscout/
 
 - **Round 1 prototype tweaks** (docs/PROTOTYPE_TWEAKS.md): "Find restaurants" button and next-step hints; "No reviews yet" states; safety profile explainer + info sheet; restaurant photos (Food / Storefront / Prep area, seed illustrations, "Add a photo" = coming soon); **food-type filter chips** (`meals.food_type`; `?type=` on the restaurant list and restaurant page; the list keeps restaurants with a *GF option* of that type); "Good for mixed groups" (`restaurants.good_for_groups`).
 
+## React prototype (frontend/)
+A mobile-first React + TypeScript prototype for the next round of testing, built with Vite and React Router (not Next.js). It runs on sample data exported from the seed, with no backend, and does not replace the Go app yet. See frontend/README.md. The wording rules above still apply: never call a restaurant or meal "safe", and show the footer disclaimer on every page.
+
 ## NOT in the MVP (don't build these yet)
 User accounts/login, verified users, real photo uploads, sorting and other filters (distance, best reviews, most options, reliability), allergen charts, other allergens (dairy, nuts, etc.), user-submitted precaution reports (the safety profile is seed data only and is not computed from reviews yet), peer review actions (Helpful / Matches my visit / Report conflict), substitution info, community events, payments, a Swift/iOS app, and outside restaurant APIs (Google Places, Foursquare, etc.).

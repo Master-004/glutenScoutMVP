@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Storefront illustration">
+  <rect width="400" height="300" fill="#F4EDE4"/>
+  <rect x="0" y="250" width="400" height="50" fill="#D8CDBF"/>
+  <rect x="60" y="60" width="280" height="190" fill="#F3DDB3" stroke="#E2C895" stroke-width="4"/>
+  <rect x="100" y="74" width="200" height="30" rx="6" fill="#2F5D6B"/>
+  <g fill="#F4EDE4"><rect x="130" y="86" width="140" height="6" rx="3"/></g>
+  <path d="M60 112 h280 v18 q-17.5 14 -35 0 q-17.5 14 -35 0 q-17.5 14 -35 0 q-17.5 14 -35 0 q-17.5 14 -35 0 q-17.5 14 -35 0 q-17.5 14 -35 0 q-17.5 14 -35 0z" fill="#2F5D6B"/>
+  <rect x="80" y="146" width="80" height="70" rx="4" fill="#CFE3EA"/>
+  <rect x="240" y="146" width="80" height="70" rx="4" fill="#CFE3EA"/>
+  <rect x="172" y="146" width="56" height="104" rx="4" fill="#5A3221"/>
+  <circle cx="218" cy="200" r="4" fill="#F2C14E"/>
+  <g fill="#6BAF5B"><circle cx="70" cy="236" r="14"/><circle cx="330" cy="236" r="14"/></g>
+  <g fill="#8B4A2B"><rect x="62" y="236" width="16" height="16" rx="2"/><rect x="322" y="236" width="16" height="16" rx="2"/></g>
+</svg>

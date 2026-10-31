@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Fries">
+  <rect width="400" height="300" fill="#F4EDE4"/>
+  <ellipse cx="204" cy="158" rx="114" ry="112" fill="#E6DACB"/>
+  <circle cx="200" cy="150" r="112" fill="#FFFFFF"/>
+  <circle cx="200" cy="150" r="94" fill="none" stroke="#EFE7DC" stroke-width="3"/>
+  <g fill="#F2C14E" stroke="#E0A93A" stroke-width="2"><rect x="150" y="100" width="14" height="90" rx="3" transform="rotate(-20 157 145)"/><rect x="172" y="92" width="14" height="100" rx="3" transform="rotate(-6 179 142)"/><rect x="194" y="96" width="14" height="96" rx="3" transform="rotate(8 201 144)"/><rect x="216" y="100" width="14" height="90" rx="3" transform="rotate(20 223 145)"/><rect x="182" y="112" width="14" height="86" rx="3" transform="rotate(35 189 155)"/><rect x="200" y="112" width="14" height="86" rx="3" transform="rotate(-38 207 155)"/></g>
+  <circle cx="255" cy="200" r="20" fill="#D2492A"/>
+  <circle cx="250" cy="195" r="6" fill="#E8735A"/>
+</svg>

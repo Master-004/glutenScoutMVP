@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Steak">
+  <rect width="400" height="300" fill="#F4EDE4"/>
+  <ellipse cx="204" cy="158" rx="114" ry="112" fill="#E6DACB"/>
+  <circle cx="200" cy="150" r="112" fill="#FFFFFF"/>
+  <circle cx="200" cy="150" r="94" fill="none" stroke="#EFE7DC" stroke-width="3"/>
+  <path d="M130 140 q10 -50 80 -46 q70 6 64 56 q-6 50 -76 50 q-74 -4 -68 -60z" fill="#8B4A2B"/>
+  <path d="M142 142 q10 -40 70 -36 q58 6 52 46 q-6 40 -64 40 q-62 -4 -58 -50z" fill="#A85C36"/>
+  <g stroke="#5E2F1A" stroke-width="6" stroke-linecap="round"><line x1="160" y1="120" x2="200" y2="180"/><line x1="190" y1="110" x2="232" y2="172"/><line x1="222" y1="112" x2="252" y2="156"/></g>
+  <g fill="#3F8F4F"><rect x="232" y="196" width="40" height="7" rx="3" transform="rotate(-20 252 200)"/><rect x="236" y="208" width="40" height="7" rx="3" transform="rotate(-10 256 211)"/></g>
+</svg>

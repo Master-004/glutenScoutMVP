@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Salad">
+  <rect width="400" height="300" fill="#F4EDE4"/>
+  <ellipse cx="204" cy="158" rx="114" ry="112" fill="#E6DACB"/>
+  <circle cx="200" cy="150" r="112" fill="#FFFFFF"/>
+  <circle cx="200" cy="150" r="94" fill="none" stroke="#EFE7DC" stroke-width="3"/>
+  <g fill="#6BAF5B"><circle cx="170" cy="130" r="34"/><circle cx="228" cy="128" r="32"/><circle cx="200" cy="178" r="36"/><circle cx="160" cy="178" r="26"/><circle cx="240" cy="175" r="28"/></g>
+  <g fill="#8CC56A"><circle cx="195" cy="125" r="22"/><circle cx="215" cy="160" r="20"/><circle cx="172" cy="158" r="18"/></g>
+  <g fill="#E0533D"><circle cx="230" cy="145" r="10"/><circle cx="180" cy="195" r="10"/><circle cx="160" cy="138" r="9"/></g>
+  <g fill="#E8A13A"><circle cx="205" cy="190" r="8"/><circle cx="245" cy="118" r="8"/></g>
+  <g fill="#FFF6E5"><circle cx="200" cy="148" r="6"/><circle cx="222" cy="182" r="5"/></g>
+</svg>

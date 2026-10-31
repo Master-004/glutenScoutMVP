@@ -11,3 +11,7 @@
 .idea/
 .DS_Store
 Thumbs.db
+
+# React prototype
+frontend/node_modules/
+frontend/dist/
