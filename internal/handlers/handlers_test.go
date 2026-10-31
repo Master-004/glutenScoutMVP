@@ -337,7 +337,7 @@ func TestNextStepsAreObvious(t *testing.T) {
 
 	meal := get(t, h, "/meals/100").Body.String()
 	for _, want := range []string{
-		`href="/restaurants?city=provo-ut">← Provo restaurants</a>`, // back to the list
+		`href="/restaurants?city=provo-ut#results">← Provo restaurants</a>`, // back to the list
 		`href="/restaurants/10">Canyon Hearth Pizza</a>`,            // back to the restaurant
 		">Write a review</button>",                                  // the next step
 	} {

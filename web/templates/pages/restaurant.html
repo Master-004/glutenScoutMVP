@@ -1,7 +1,8 @@
 {{define "title"}}{{.Restaurant.Name}}{{end}}
 
 {{define "content"}}
-<a class="back-link" href="/restaurants?city={{.Restaurant.CitySlug}}">← Back to {{.Restaurant.CityName}} restaurants</a>
+{{/* #results lands on the list itself, not the city picker above it. */}}
+<a class="back-link" href="/restaurants?city={{.Restaurant.CitySlug}}#results">← Back to {{.Restaurant.CityName}} restaurants</a>
 
 <section class="restaurant-header">
   <h1>{{.Restaurant.Name}}</h1>

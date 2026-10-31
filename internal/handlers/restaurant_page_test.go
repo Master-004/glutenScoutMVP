@@ -20,7 +20,7 @@ func TestRestaurantPageFound(t *testing.T) {
 		// Header info.
 		"<h1>Canyon Hearth Pizza</h1>", "Pizza", "410 Timber Lane", "Wood-fired pizza.",
 		// Back link returns to the right city list.
-		`href="/restaurants?city=provo-ut"`, "Back to Provo restaurants",
+		`href="/restaurants?city=provo-ut#results"`, "Back to Provo restaurants",
 		// Meal cards with name, description, and photo.
 		"GF Margherita", "Tomato and basil.",
 		// Images are lazy and use the meal name as alt text.

@@ -4,7 +4,7 @@
 {{/* Breadcrumb: a clear way back to the restaurant and to the city's
      restaurant list, from the deepest screen. */}}
 <nav class="breadcrumb" aria-label="Breadcrumb">
-  <a class="back-link" href="/restaurants?city={{.Meal.CitySlug}}">← {{.Meal.CityName}} restaurants</a>
+  <a class="back-link" href="/restaurants?city={{.Meal.CitySlug}}#results">← {{.Meal.CityName}} restaurants</a>
   <span aria-hidden="true">/</span>
   <a class="back-link" href="/restaurants/{{.Meal.RestaurantID}}">{{.Meal.RestaurantName}}</a>
 </nav>
