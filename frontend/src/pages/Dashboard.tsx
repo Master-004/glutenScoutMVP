@@ -32,11 +32,12 @@ export function Dashboard() {
         </div>
       </section>
 
-      <CityPicker ref={picker} error={needCity && !city ? "Choose your city first." : undefined} />
+      <CityPicker ref={picker} prominent error={needCity && !city ? "Choose your city first." : undefined} />
 
       <section aria-labelledby="tiles-heading">
         <h2 id="tiles-heading" className="section-header">What sounds good?</h2>
-        <ul className="tile-grid">
+        {/* Quieter until there's a city: the picker above is the next step. */}
+        <ul className={`tile-grid${city ? "" : " tile-grid-waiting"}`}>
           {TILES.map((tile) => (
             <li key={tile.id}>
               <button type="button" className="tile" onClick={() => openTile(tile)}>{tile.label}</button>
