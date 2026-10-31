@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getTile, safetyStatus, search, summarize, TILES, validateReview, type Review } from "./data";
+import { getTile, nextSearchParams, safetyStatus, search, summarize, TILES, validateReview, type Review } from "./data";
 
 const PROVO = 1;
 const SLC = 2;
@@ -47,6 +47,23 @@ describe("search", () => {
     expect(names(search({ cityId: PROVO, query: "chocolate chip" }))).toEqual([]);
   });
   it("has six tiles", () => expect(TILES).toHaveLength(6));
+});
+
+describe("nextSearchParams", () => {
+  it("clears the tile when someone types, so tacos searches the whole city", () => {
+    const p = nextSearchParams(new URLSearchParams("tile=american"), { q: "tacos" });
+    expect(p.toString()).toBe("q=tacos");
+    expect(names(search({ cityId: PROVO, tile: getTile(p.get("tile")), query: p.get("q")! }))).toContain("Sunrise Taqueria");
+  });
+  it("keeps the tile when the search box is emptied", () => {
+    expect(nextSearchParams(new URLSearchParams("tile=thai&q=x"), { q: "" }).toString()).toBe("tile=thai");
+  });
+  it("keeps the text when a tile is tapped", () => {
+    expect(nextSearchParams(new URLSearchParams("q=tacos"), { tile: "american" }).toString()).toBe("q=tacos&tile=american");
+  });
+  it("removes the tile for All", () => {
+    expect(nextSearchParams(new URLSearchParams("tile=thai"), { tile: null }).toString()).toBe("");
+  });
 });
 
 describe("summarize", () => {

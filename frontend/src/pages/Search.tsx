@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 import { CityPicker } from "../components/CityPicker";
 import { RestaurantRow } from "../components/RestaurantRow";
-import { cities, getTile, search, TILES } from "../lib/data";
+import { cities, getTile, nextSearchParams, search, TILES } from "../lib/data";
 import { useStore } from "../lib/store";
 
 // The tile and search text live in the URL, so Back returns to these results.
@@ -14,17 +14,11 @@ export function Search() {
   const results = search({ cityId: city?.id ?? null, tile, query });
 
   function change(next: { tile?: string | null; q?: string }) {
-    const p = new URLSearchParams(params);
-    if (next.tile !== undefined) {
-      if (next.tile) p.set("tile", next.tile); else p.delete("tile");
-    }
-    if (next.q !== undefined) {
-      if (next.q) p.set("q", next.q); else p.delete("q");
-    }
-    setParams(p, { replace: next.q !== undefined });
+    setParams(nextSearchParams(params, next), { replace: next.q !== undefined });
   }
 
   const where = city ? ` in ${city.name}` : "";
+  const everywhere = city ? `all of ${city.name}` : "every city";
   return (
     <>
       <h1 className="page-title">Search</h1>
@@ -56,6 +50,12 @@ export function Search() {
             ))}
           </ul>
         </>
+      ) : tile && query ? (
+        // Both a tile and text: offer the way out instead of a dead end.
+        <p className="empty" aria-live="polite">
+          No "{query}" under {tile.label}{where}.{" "}
+          <button type="button" className="link-button" onClick={() => change({ tile: null })}>Search {everywhere} for "{query}"</button>
+        </p>
       ) : (
         <p className="empty" aria-live="polite">
           Nothing matches{tile ? ` ${tile.label}` : ""}{query ? ` "${query}"` : ""}{where} yet.{" "}

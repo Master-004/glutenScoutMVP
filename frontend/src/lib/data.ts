@@ -125,6 +125,26 @@ export function search(opts: { cityId: number | null; tile?: Tile; query?: strin
   return out.sort((a, b) => a.restaurant.name.localeCompare(b.restaurant.name));
 }
 
+// How the search URL changes. Typing searches the whole city: someone who
+// picked American and then types "tacos" has changed their mind, so the tile
+// must not quietly narrow the search to nothing.
+export function nextSearchParams(current: URLSearchParams, next: { tile?: string | null; q?: string }): URLSearchParams {
+  const p = new URLSearchParams(current);
+  if (next.q !== undefined) {
+    if (next.q) {
+      p.set("q", next.q);
+      p.delete("tile");
+    } else {
+      p.delete("q");
+    }
+  }
+  if (next.tile !== undefined) {
+    if (next.tile) p.set("tile", next.tile);
+    else p.delete("tile");
+  }
+  return p;
+}
+
 export interface RatingSummary { average: number; ratingCount: number; reviewCount: number }
 
 // Restaurant-written reviews carry no rating (restaurants don't rate their own
