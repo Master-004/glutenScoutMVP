@@ -44,7 +44,7 @@ export function SafetySheet({ restaurant, open, onClose }: { restaurant: Restaur
       open={open} onClose={onClose} title="Kitchen safety"
       footer={
         <div className="sheet-actions">
-          {callInFooter && <a className="button-secondary" href={`tel:+1${digits}`}>Call the restaurant</a>}
+          {callInFooter && <a className="button-secondary" href={`tel:+1${digits}`}>Call restaurant</a>}
           <button type="button" className="button" onClick={onClose}>OK</button>
         </div>
       }

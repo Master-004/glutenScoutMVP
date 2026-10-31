@@ -44,7 +44,7 @@ function PhotoSheet({ restaurant, open, onClose }: { restaurant: R; open: boolea
           );
         })}
       </ul>
-      <p className="meta">Illustrations for now. Real photos from diners are coming.</p>
+      <p className="meta">Illustrations for now. Real photos are coming.</p>
       <button type="button" className="button-secondary" onClick={() => setComingSoon(true)}>Add a photo</button>
       {comingSoon && <p role="status" className="meta">Coming soon: you'll be able to add photos of the restaurant, prep areas and menus.</p>}
     </Sheet>
