@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Menu board illustration">
+  <rect width="400" height="300" fill="#E9E4DA"/>
+  <rect x="60" y="34" width="280" height="232" rx="8" fill="#2F3B37" stroke="#8A6B43" stroke-width="8"/>
+  <rect x="150" y="56" width="100" height="12" rx="3" fill="#F2C14E"/>
+  <g fill="#E8EDEA"><rect x="90" y="92" width="130" height="7" rx="3"/><rect x="90" y="118" width="150" height="7" rx="3"/><rect x="90" y="144" width="110" height="7" rx="3"/><rect x="90" y="170" width="140" height="7" rx="3"/><rect x="90" y="196" width="120" height="7" rx="3"/><rect x="90" y="222" width="150" height="7" rx="3"/></g>
+  <g fill="#F2C14E"><rect x="285" y="92" width="24" height="7" rx="3"/><rect x="285" y="118" width="24" height="7" rx="3"/><rect x="285" y="144" width="24" height="7" rx="3"/><rect x="285" y="170" width="24" height="7" rx="3"/><rect x="285" y="196" width="24" height="7" rx="3"/><rect x="285" y="222" width="24" height="7" rx="3"/></g>
+</svg>

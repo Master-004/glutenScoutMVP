@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { precautionsFor, safetyFor, safetyStatus, shortDate, type Restaurant, type SafetyLevel } from "../lib/data";
 import { EvidenceIcon, Icons, Sheet } from "./ui";
 
@@ -39,7 +38,6 @@ export function SafetySheet({ restaurant, open, onClose }: { restaurant: Restaur
   const confirmed = list.filter((p) => p.status === "confirmed");
   const digits = restaurant.phone.replace(/\D/g, "");
   const callInFooter = status.level !== "confirmed" && digits !== "";
-  const [how, setHow] = useState(false);
 
   return (
     <Sheet
@@ -90,7 +88,7 @@ export function SafetySheet({ restaurant, open, onClose }: { restaurant: Restaur
         </p>
       )}
 
-      <details className="sheet-details" open={how} onToggle={(e) => setHow(e.currentTarget.open)}>
+      <details className="sheet-details">
         <summary>How this works</summary>
         <p>Based on how the kitchen handles prep, from the restaurant's answers and gluten-free diners' reports.</p>
         <dl className="levels">

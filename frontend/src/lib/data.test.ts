@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { getTile, nextSearchParams, safetyStatus, search, summarize, TILES, validateReview, type Review } from "./data";
+import { cities, getTile, meals, mealsFor, nextSearchParams, photosFor, restaurants, safetyStatus, sampleReviews, search, summarize, TILES, validateReview, type Review } from "./data";
 
 const PROVO = 1;
-const SLC = 2;
 const names = (r: ReturnType<typeof search>) => r.map((x) => x.restaurant.name);
 
 describe("safetyStatus", () => {
@@ -13,7 +12,7 @@ describe("safetyStatus", () => {
     expect(safetyStatus(10).level).toBe("none");
   });
   it("never uses the word safe", () => {
-    for (let id = 1; id <= 13; id++) {
+    for (let id = 1; id <= 30; id++) {
       const st = safetyStatus(id);
       expect(`${st.label} ${st.summary}`).not.toMatch(/\bsafe\b/i);
     }
@@ -22,19 +21,14 @@ describe("safetyStatus", () => {
 
 describe("search", () => {
   it("counts only desserts under the Desserts tile", () => {
-    const r = search({ cityId: PROVO, tile: getTile("desserts") });
-    expect(names(r)).toEqual(["Maple & Sage Kitchen"]);
-    expect(r[0]).toMatchObject({ gfCount: 1, countNoun: "dessert" });
+    const maple = search({ cityId: PROVO, tile: getTile("desserts") }).find((r) => r.restaurant.name === "Maple & Sage Kitchen");
+    expect(maple).toMatchObject({ gfCount: 1, countNoun: "dessert" });
   });
   it("leaves out a restaurant whose only dessert contains gluten", () => {
     expect(names(search({ cityId: PROVO, tile: getTile("desserts") }))).not.toContain("Cluck Shack");
   });
   it("groups pizza under Italian", () => {
-    expect(names(search({ cityId: PROVO, tile: getTile("italian") }))).toEqual(["Canyon Hearth Pizza"]);
-  });
-  it("returns nothing for a tile the city doesn't have", () => {
-    expect(search({ cityId: PROVO, tile: getTile("thai") })).toEqual([]);
-    expect(names(search({ cityId: SLC, tile: getTile("thai") }))).toEqual(["Saltbox Thai"]);
+    expect(names(search({ cityId: PROVO, tile: getTile("italian") }))).toContain("Canyon Hearth Pizza");
   });
   it("shows only group-friendly restaurants under Mixed groups", () => {
     const r = search({ cityId: PROVO, tile: getTile("groups") });
@@ -50,6 +44,39 @@ describe("search", () => {
     expect(names(search({ cityId: PROVO, query: "chocolate chip" }))).toEqual([]);
   });
   it("has six tiles", () => expect(TILES).toHaveLength(6));
+});
+
+// Testers shouldn't hit an empty tile because the sample data is thin.
+describe("sample data", () => {
+  it("has at least two restaurants for every tile in every city", () => {
+    for (const city of cities) {
+      for (const tile of TILES) {
+        expect(search({ cityId: city.id, tile }).length, `${tile.label} in ${city.name}`).toBeGreaterThanOrEqual(2);
+      }
+    }
+  });
+  it("has enough content to feel real", () => {
+    expect(restaurants.length).toBe(30);
+    expect(meals.length).toBeGreaterThanOrEqual(140);
+    expect(sampleReviews.length).toBeGreaterThanOrEqual(110);
+  });
+  it("gives every restaurant a restaurant, prep and menu photo", () => {
+    for (const r of restaurants) expect(photosFor(r.id).map((p) => p.kind).sort()).toEqual(["menu", "prep", "restaurant"]);
+  });
+  it("keeps every safety state for testers to run into", () => {
+    const levels = new Set(restaurants.map((r) => safetyStatus(r.id).level));
+    expect([...levels].sort()).toEqual(["confirmed", "conflict", "none", "unverified"]);
+  });
+  it("keeps restaurants with no reviews", () => {
+    const empty = restaurants.filter((r) => !mealsFor(r.id).some((m) => sampleReviews.some((v) => v.mealId === m.id)));
+    expect(empty.length).toBeGreaterThanOrEqual(2);
+  });
+  it("never has a sample review call a meal safe", () => {
+    expect(sampleReviews.filter((r) => /\bsafe\b/i.test(r.body) && r.id >= 2000)).toEqual([]);
+  });
+  it("uses phone numbers reserved for fiction", () => {
+    for (const r of restaurants) if (r.phone) expect(r.phone).toMatch(/555-01\d\d$/);
+  });
 });
 
 describe("nextSearchParams", () => {

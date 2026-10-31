@@ -270,6 +270,10 @@ input[type="search"], input:not([type]), textarea {
 .photo-groups img, .photo-missing { width: 100%; aspect-ratio: 4 / 3; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface); }
 .photo-missing { display: grid; place-items: center; color: var(--ink-secondary); font-size: 12px; font-weight: 600; text-align: center; }
 .photo-label { margin: 0 0 var(--space-1); font-size: 13px; font-weight: 700; }
+.photo-date { margin: var(--space-1) 0 0; color: var(--ink-secondary); font-size: 12px; font-weight: 600; }
+.meal-photo-note { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin: calc(var(--space-2) * -1) 0 var(--space-4); }
+.meal-photo-note .meta { margin: 0; }
+.meal-photo-note .button-secondary { flex: none; }
 .filter-note { margin-top: calc(var(--space-2) * -1); }
 
 /* ---------- Scout video overlay: white card, because the clips have white backgrounds ---------- */

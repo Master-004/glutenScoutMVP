@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams, useLocation } from "react-router-dom";
 import { SafetyButton, SafetySheet } from "../components/SafetySheet";
 import { GroupsLabel, Img, MealRow, Rating, Sheet, useRestaurantSummary } from "../components/ui";
-import { getRestaurant, mealsFor, photosFor, type Meal, type Restaurant as R } from "../lib/data";
+import { getRestaurant, mealsFor, photosFor, shortDate, type Meal, type Restaurant as R } from "../lib/data";
 import { useStore } from "../lib/store";
 import { NotFound } from "./NotFound";
 
@@ -21,9 +21,9 @@ export function BackLink({ fallback }: { fallback: string }) {
 }
 
 const PHOTO_GROUPS = [
-  { kind: "food", label: "Food" },
-  { kind: "storefront", label: "Storefront" },
-  { kind: "prep", label: "Prep area" },
+  { kind: "restaurant", label: "Restaurant" },
+  { kind: "prep", label: "Prep areas" },
+  { kind: "menu", label: "Menus" },
 ] as const;
 
 function PhotoSheet({ restaurant, open, onClose }: { restaurant: R; open: boolean; onClose(): void }) {
@@ -38,13 +38,15 @@ function PhotoSheet({ restaurant, open, onClose }: { restaurant: R; open: boolea
             <li key={g.kind}>
               <h3 className="photo-label">{g.label}</h3>
               {photo ? <Img src={photo.url} alt={photo.alt} /> : <div className="photo-missing">No photo yet</div>}
+              {/* Menus change, so a menu photo always says how old it is. */}
+              {photo?.addedOn && <p className="photo-date">Added {shortDate(photo.addedOn)}</p>}
             </li>
           );
         })}
       </ul>
       <p className="meta">Illustrations for now. Real photos from diners are coming.</p>
       <button type="button" className="button-secondary" onClick={() => setComingSoon(true)}>Add a photo</button>
-      {comingSoon && <p role="status" className="meta">Coming soon: you'll be able to add photos here.</p>}
+      {comingSoon && <p role="status" className="meta">Coming soon: you'll be able to add photos of the restaurant, prep areas and menus.</p>}
     </Sheet>
   );
 }
@@ -75,7 +77,7 @@ export function Restaurant() {
   const gf = meals.filter((m) => m.gfStatus === "gf");
   const cross = meals.filter((m) => m.gfStatus === "cross_contact");
   const contains = meals.filter((m) => m.gfStatus === "contains");
-  const photo = photosFor(restaurant.id).find((p) => p.kind === "storefront");
+  const photo = photosFor(restaurant.id).find((p) => p.kind === "restaurant");
   const saved = savedRestaurants.includes(restaurant.id);
 
   return (

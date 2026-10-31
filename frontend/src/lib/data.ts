@@ -22,7 +22,8 @@ export interface SafetyProfile {
   restaurantId: number; verifiedOn: string; answersUpdatedOn: string | null; conflictNote: string;
 }
 export interface Precaution { restaurantId: number; label: string; status: Evidence }
-export interface Photo { restaurantId: number; kind: "food" | "storefront" | "prep"; url: string; alt: string }
+// Food photos aren't here: those belong to meals, because they come from diners.
+export interface Photo { restaurantId: number; kind: "restaurant" | "prep" | "menu"; url: string; alt: string; addedOn?: string }
 
 export const cities = sample.cities as City[];
 export const restaurants = sample.restaurants as Restaurant[];

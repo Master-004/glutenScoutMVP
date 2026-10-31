@@ -68,6 +68,7 @@ export function Meal() {
   const [writing, setWriting] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
   const [posted, setPosted] = useState(false);
+  const [photoNote, setPhotoNote] = useState(false);
   const finish = useCallback(() => setCelebrating(false), []);
   const meal = getMeal(Number(id));
   const restaurant = meal && getRestaurant(meal.restaurantId);
@@ -79,7 +80,13 @@ export function Meal() {
   return (
     <>
       <BackLink fallback={`/restaurants/${restaurant.id}`} />
-      <Img className="meal-hero" src={meal.photo} alt={meal.name} />
+      <Img className="meal-hero" src={meal.photo} alt={`Illustration of ${meal.name}`} />
+      {/* Meal photos come from diners, so this is where they'd add one. */}
+      <div className="meal-photo-note">
+        <p className="meta">Illustration for now. Photos from diners are coming.</p>
+        <button type="button" className="button-secondary" onClick={() => setPhotoNote(true)}>Add a photo</button>
+      </div>
+      {photoNote && <p role="status" className="meta">Coming soon: you'll be able to add your photo of this meal.</p>}
       <h1 className="identity-title">{meal.name}</h1>
       <Rating summary={summarize(reviews)} />
       {reviews.some((r) => r.rating > 0) && <p className="hint">Stars rate the food, not gluten safety.</p>}
