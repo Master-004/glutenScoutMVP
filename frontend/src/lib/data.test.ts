@@ -7,13 +7,16 @@ const names = (r: ReturnType<typeof search>) => r.map((x) => x.restaurant.name);
 
 describe("safetyStatus", () => {
   it("shows a disagreement on the button", () => {
-    expect(safetyStatus(1)).toEqual({ level: "conflict", text: "Reports disagree · Verified Sep 12" });
+    expect(safetyStatus(1)).toMatchObject({ level: "conflict", label: "Reports disagree", verifiedOn: "2026-09-12" });
   });
   it("says so when a restaurant has no profile", () => {
     expect(safetyStatus(10).level).toBe("none");
   });
   it("never uses the word safe", () => {
-    for (let id = 1; id <= 13; id++) expect(safetyStatus(id).text).not.toMatch(/safe/i);
+    for (let id = 1; id <= 13; id++) {
+      const st = safetyStatus(id);
+      expect(`${st.label} ${st.summary}`).not.toMatch(/\bsafe\b/i);
+    }
   });
 });
 

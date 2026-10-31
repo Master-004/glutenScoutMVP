@@ -55,23 +55,26 @@ export function shortDate(iso: string, withYear = false): string {
   });
 }
 
-// The status line on the safety button. Warnings have to show here, on the
-// page, because anyone can skip a button. Copy rule: name what's known, and
-// never call a restaurant "safe".
-export interface SafetyStatus { level: Evidence | "none"; text: string }
+// The status shown on the safety button, search results and the sheet. Warnings
+// have to show on the page, because anyone can skip a button. Copy rule: name
+// what's known, and never call a restaurant "safe".
+export type SafetyLevel = Evidence | "none";
+export interface SafetyStatus { level: SafetyLevel; label: string; summary: string; verifiedOn?: string }
 
 export function safetyStatus(restaurantId: number): SafetyStatus {
   const profile = safetyFor(restaurantId);
-  if (!profile) return { level: "none", text: "No safety information yet" };
+  if (!profile) {
+    return { level: "none", label: "No safety information yet", summary: "Nobody has reported on this kitchen yet. Call ahead and ask before you order." };
+  }
   const list = precautionsFor(restaurantId);
-  const date = `Verified ${shortDate(profile.verifiedOn)}`;
+  const { verifiedOn } = profile;
   if (profile.conflictNote || list.some((p) => p.status === "conflict")) {
-    return { level: "conflict", text: `Reports disagree · ${date}` };
+    return { level: "conflict", label: "Reports disagree", summary: profile.conflictNote || "Reports don't agree about the practices below.", verifiedOn };
   }
   if (list.length === 0 || list.some((p) => p.status === "unverified")) {
-    return { level: "unverified", text: `Some details unconfirmed · ${date}` };
+    return { level: "unverified", label: "Some details unconfirmed", summary: "Some practices haven't been backed up by diners, or the information is out of date.", verifiedOn };
   }
-  return { level: "confirmed", text: `Practices confirmed · ${date}` };
+  return { level: "confirmed", label: "Practices confirmed", summary: "The restaurant and recent gluten-free diners agree on the practices below.", verifiedOn };
 }
 
 // Dashboard tiles. A plain list so tiles can change after testing: the set

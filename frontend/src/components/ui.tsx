@@ -10,6 +10,7 @@ const svg = (children: ReactNode, size = 20) => (
 export const Icons = {
   check: svg(<path d="M5 12.5l4.5 4.5L19 7.5" />, 16),
   conflict: svg(<><path d="M12 3l10 18H2z" /><path d="M12 10v5M12 18v.01" /></>, 16),
+  unknown: svg(<><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17v.01" /></>, 16),
   clock: svg(<><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>, 16),
   x: svg(<><circle cx="12" cy="12" r="9" /><path d="M9 9l6 6M15 9l-6 6" /></>, 16),
   group: svg(<><circle cx="9" cy="8" r="3" /><circle cx="17" cy="9" r="2.5" /><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15 14.5c3 0 5.5 2.2 5.5 5.5" /></>, 16),

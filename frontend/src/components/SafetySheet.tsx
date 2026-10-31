@@ -1,83 +1,119 @@
-import { shortDate, precautionsFor, safetyFor, safetyStatus, type Restaurant } from "../lib/data";
+import { useState } from "react";
+import { precautionsFor, safetyFor, safetyStatus, shortDate, type Restaurant, type SafetyLevel } from "../lib/data";
 import { EvidenceIcon, Icons, Sheet } from "./ui";
 
-const LEVEL_WORDS = { confirmed: "Confirmed", conflict: "Reports disagree", unverified: "Unverified" };
+// Status is never color alone: each level has its own icon and words too.
+export function StatusIcon({ level }: { level: SafetyLevel }) {
+  return level === "none" ? Icons.unknown : <EvidenceIcon level={level} />;
+}
 
-// The button shows the status so warnings stay on the page, even for someone
-// who never opens the sheet. The green fill makes it the page's next action.
+// One tap target: the colored strip says what's known, so warnings stay on the
+// page even for someone who never opens the sheet. The green part stays the
+// same at every level, because checking is always the next step.
 export function SafetyButton({ restaurantId, onClick }: { restaurantId: number; onClick(): void }) {
   const status = safetyStatus(restaurantId);
   return (
     <button type="button" className="safety-button" onClick={onClick}>
-      <span className="safety-button-icon">{Icons.clipboard}</span>
-      <span className="safety-button-text">
-        <span className="safety-button-title">Check kitchen safety</span>
-        <span className="safety-button-status">
-          {status.level === "conflict" ? Icons.conflict : status.level === "confirmed" ? Icons.check : Icons.clock}
-          {status.text}
-        </span>
+      <span className={`safety-strip status-${status.level}`}>
+        <span className="safety-strip-label"><StatusIcon level={status.level} />{status.label}</span>
+        {status.verifiedOn && <span className="safety-strip-date">Verified {shortDate(status.verifiedOn)}</span>}
       </span>
-      <span className="chevron" aria-hidden="true">›</span>
+      <span className="safety-action">
+        {Icons.clipboard}
+        <span className="safety-action-title">Check kitchen safety</span>
+        <span className="chevron" aria-hidden="true">›</span>
+      </span>
     </button>
   );
 }
 
+const LEVEL_WORDS = { confirmed: "Confirmed", conflict: "Reports disagree", unverified: "Unverified" };
+
+// Answers in order: what's the situation, what should I ask, what's confirmed?
+// The explanations are folded so they're there for anyone who wants them.
 export function SafetySheet({ restaurant, open, onClose }: { restaurant: Restaurant; open: boolean; onClose(): void }) {
   const profile = safetyFor(restaurant.id);
   const list = precautionsFor(restaurant.id);
-  const toConfirm = list.filter((p) => p.status !== "confirmed");
+  const status = safetyStatus(restaurant.id);
+  const askAbout = list.filter((p) => p.status !== "confirmed");
+  const confirmed = list.filter((p) => p.status === "confirmed");
   const digits = restaurant.phone.replace(/\D/g, "");
+  const callInFooter = status.level !== "confirmed" && digits !== "";
+  const [how, setHow] = useState(false);
+
   return (
     <Sheet
       open={open} onClose={onClose} title="Kitchen safety"
-      footer={<button type="button" className="button button-full" onClick={onClose}>OK</button>}
+      footer={
+        <div className="sheet-actions">
+          {callInFooter && <a className="button-secondary" href={`tel:+1${digits}`}>Call the restaurant</a>}
+          <button type="button" className="button" onClick={onClose}>OK</button>
+        </div>
+      }
     >
-      <p>Based on how the kitchen handles prep, from the restaurant's answers and gluten-free diners' reports. It's evidence, not a guarantee: you decide.</p>
+      <div className={`status-banner status-${status.level}`}>
+        <p className="status-banner-title"><StatusIcon level={status.level} />{status.label}</p>
+        <p className="status-banner-text">{status.summary}</p>
+      </div>
 
-      {profile ? (
-        <>
-          <p className="verified">{Icons.clock} Last verified {shortDate(profile.verifiedOn, true)}</p>
-          {profile.conflictNote && <p className="conflict-note">{Icons.conflict}<span>{profile.conflictNote}</span></p>}
-          {list.length > 0 && (
-            <ul className="badges">
-              {list.map((p) => (
-                <li key={p.label} className={`badge badge-${p.status}`}>
-                  <EvidenceIcon level={p.status} />
-                  <span className="visually-hidden">{LEVEL_WORDS[p.status]}: </span>{p.label}
-                </li>
-              ))}
-            </ul>
-          )}
-          <p className="meta"><strong>Restaurant answers</strong> · {profile.answersUpdatedOn ? `updated ${shortDate(profile.answersUpdatedOn, true)}` : "not answered yet"}</p>
-        </>
-      ) : (
-        <p className="verified">{Icons.clock} Nobody has reported on this kitchen yet. Call ahead and ask before you order.</p>
+      {askAbout.length > 0 && (
+        <section className="practice-group">
+          <h3 className="practice-heading">Ask about</h3>
+          <ul>
+            {askAbout.map((p) => (
+              <li key={p.label} className={`practice practice-${p.status}`}>
+                <EvidenceIcon level={p.status} />
+                <span className="visually-hidden">{LEVEL_WORDS[p.status]}: </span>{p.label}
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
-      <details className="sheet-details">
-        <summary>What do these labels mean?</summary>
+      {confirmed.length > 0 && (
+        <section className="practice-group">
+          <h3 className="practice-heading">Confirmed</h3>
+          <ul>
+            {confirmed.map((p) => (
+              <li key={p.label} className="practice practice-confirmed">
+                <EvidenceIcon level="confirmed" />{p.label}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {profile && (
+        <p className="sheet-fineprint">
+          Verified {shortDate(profile.verifiedOn, true)} · Evidence, not a guarantee<br />
+          {profile.answersUpdatedOn ? `Restaurant answered ${shortDate(profile.answersUpdatedOn, true)}` : "Restaurant hasn't answered yet"}
+        </p>
+      )}
+
+      <details className="sheet-details" open={how} onToggle={(e) => setHow(e.currentTarget.open)}>
+        <summary>How this works</summary>
+        <p>Based on how the kitchen handles prep, from the restaurant's answers and gluten-free diners' reports.</p>
         <dl className="levels">
-          <dt><span className="badge badge-confirmed">{Icons.check}Confirmed</span></dt>
+          <dt>{Icons.check} Confirmed</dt>
           <dd>The restaurant and recent gluten-free diners agree.</dd>
-          <dt><span className="badge badge-conflict">{Icons.conflict}Reports disagree</span></dt>
-          <dd>Reports conflict, or nobody has backed up the claim yet. Worth asking about.</dd>
-          <dt><span className="badge badge-unverified">{Icons.clock}Unverified</span></dt>
+          <dt>{Icons.conflict} Reports disagree</dt>
+          <dd>Reports conflict, or nobody has backed up the claim yet.</dd>
+          <dt>{Icons.clock} Unverified</dt>
           <dd>Only the restaurant has said so, or the information is out of date.</dd>
         </dl>
-        <p><strong>Stars rate the food,</strong> not gluten safety.</p>
+        <p>Stars rate the food, not gluten safety.</p>
       </details>
 
       <details className="sheet-details">
-        <summary>Call ahead: questions to ask</summary>
+        <summary>Questions to ask when you call</summary>
         <ol className="script">
-          <li><strong>Meals:</strong> Which dishes can you make gluten-free today?</li>
-          <li><strong>Staff practices:</strong> Do cooks change gloves and use clean utensils for gluten-free orders?</li>
-          <li><strong>Food prep:</strong> Is there a separate prep area? Are fryers, ovens or grills shared?</li>
-          {toConfirm.length > 0 && <li><strong>For this kitchen:</strong> Ask about {toConfirm.map((p) => p.label.toLowerCase()).join(", ")}.</li>}
+          <li>Which dishes can you make gluten-free today?</li>
+          <li>Do cooks change gloves and use clean utensils for gluten-free orders?</li>
+          <li>Is there a separate prep area? Are fryers, ovens or grills shared?</li>
+          {askAbout.length > 0 && <li>Can you tell me about: {askAbout.map((p) => p.label.toLowerCase()).join(", ")}</li>}
         </ol>
-        {digits
-          ? <a className="button-secondary" href={`tel:+1${digits}`}>Call {restaurant.phone}</a>
-          : <p className="meta">We don't have a phone number for this restaurant yet.</p>}
+        {!callInFooter && digits && <a className="button-secondary" href={`tel:+1${digits}`}>Call {restaurant.phone}</a>}
+        {!digits && <p className="meta">We don't have a phone number for this restaurant yet.</p>}
       </details>
     </Sheet>
   );

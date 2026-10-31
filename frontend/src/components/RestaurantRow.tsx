@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { mealsFor, safetyStatus, type SearchResult } from "../lib/data";
+import { mealsFor, safetyStatus, shortDate, type SearchResult } from "../lib/data";
+import { StatusIcon } from "./SafetySheet";
 import { GroupsLabel, Rating, useRestaurantSummary } from "./ui";
 
 export function RestaurantRow({ result, foodType }: { result: SearchResult; foodType?: string }) {
@@ -12,7 +13,10 @@ export function RestaurantRow({ result, foodType }: { result: SearchResult; food
       <Rating summary={summary} />
       <p className="meta">{r.cuisine} · {r.address}</p>
       {/* The same status as the restaurant page: warnings are seen early. */}
-      <p className={`row-status row-status-${status.level}`}>{status.text}</p>
+      <p className="row-status">
+        <span className={`status-pill status-${status.level}`}><StatusIcon level={status.level} />{status.label}</span>
+        {status.verifiedOn && <span className="row-status-date">Verified {shortDate(status.verifiedOn)}</span>}
+      </p>
       {matchedMeals.length > 0 && <p className="row-match">Has {matchedMeals.join(", ")}</p>}
       <p className="row-labels">
         <span className="chip">{gfCount} GF {countNoun}{gfCount === 1 ? "" : "s"}</span>
