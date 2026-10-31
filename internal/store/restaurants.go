@@ -81,13 +81,14 @@ func (s *Store) GetRestaurant(ctx context.Context, id int64) (models.RestaurantD
 //
 // foodType ("" for all) keeps only restaurants with at least one GF option of
 // that type: "Desserts" means "somewhere I can get a gluten-free dessert".
+// meal_count follows the filter, so a row never implies 4 desserts when it has 1.
 func (s *Store) ListRestaurantsByCity(ctx context.Context, cityID int64, foodType string) ([]models.RestaurantSummary, error) {
 	// LEFT JOIN (not JOIN) keeps restaurants with zero meals, reviews or
 	// safety profile. Joining reviews repeats each meal once per review, so
 	// meals are counted with DISTINCT.
 	q := `
 		SELECT r.id, r.city_id, r.name, r.address, r.cuisine, r.description, r.phone, r.good_for_groups, r.created_at,
-		       COUNT(DISTINCT m.id) FILTER (WHERE m.gf_status = 'gf') AS meal_count,
+		       COUNT(DISTINCT m.id) FILTER (WHERE m.gf_status = 'gf' AND ($2 = '' OR m.food_type = $2)) AS meal_count,
 		       sp.verified_on,` + ratingColumns + `
 		FROM restaurants r
 		LEFT JOIN meals m ON m.restaurant_id = r.id

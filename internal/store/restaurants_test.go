@@ -170,6 +170,7 @@ func TestListRestaurantsByCity(t *testing.T) {
 		ctx := context.Background()
 		sweet := insertRestaurant(t, s, filterCity, "Sweet Spot")
 		mustInsert(t, s, `INSERT INTO meals (restaurant_id, name, food_type) VALUES ($1, 'Flourless Cake', 'dessert') RETURNING id`, sweet)
+		insertMeal(t, s, sweet, "Soup", "") // not a dessert: must not count under the filter
 		// Only dessert has gluten: must not count as "has a GF dessert".
 		gluten := insertRestaurant(t, s, filterCity, "Gluten Bakery")
 		mustInsert(t, s, `INSERT INTO meals (restaurant_id, name, food_type, gf_status) VALUES ($1, 'Croissant', 'dessert', 'contains') RETURNING id`, gluten)
@@ -180,7 +181,10 @@ func TestListRestaurantsByCity(t *testing.T) {
 			t.Fatal(err)
 		}
 		if len(got) != 1 || got[0].Name != "Sweet Spot" {
-			t.Errorf("dessert filter = %+v, want only Sweet Spot", got)
+			t.Fatalf("dessert filter = %+v, want only Sweet Spot", got)
+		}
+		if got[0].MealCount != 1 {
+			t.Errorf("filtered MealCount = %d, want 1 (desserts only)", got[0].MealCount)
 		}
 		if all, _ := s.ListRestaurantsByCity(ctx, filterCity, ""); len(all) != 3 {
 			t.Errorf("no filter: got %d restaurants, want 3", len(all))

@@ -68,6 +68,9 @@ func TestRestaurantListFoodTypeFilter(t *testing.T) {
 	if !strings.Contains(salads, `href="/restaurants/10?type=salad#meals"`) {
 		t.Error("restaurant links should carry the filter into the meal list")
 	}
+	if strings.Contains(salads, " GF meal") || !strings.Contains(salads, " GF salad") {
+		t.Error("a filtered row should count the filtered type, not meals")
+	}
 
 	// Desserts: none here, so a message and a way back to all.
 	desserts := get(t, h, "/restaurants?city=provo-ut&type=dessert").Body.String()

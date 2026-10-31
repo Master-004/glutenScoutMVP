@@ -30,7 +30,9 @@
            profile was last verified (or that there isn't one yet). */}}
       <p class="verified">{{template "icon_clock"}} {{if .VerifiedOn}}Last verified {{date .VerifiedOn}}{{else}}No safety information yet{{end}}</p>
       <p class="row-labels">
-        <span class="chip">{{.MealCount}} GF {{if eq .MealCount 1}}meal{{else}}meals{{end}}</span>
+        {{/* Names the filtered type, e.g. "1 GF dessert"; the count follows the filter. */}}
+        {{$noun := "meal"}}{{with $.FoodType}}{{$noun = .Noun}}{{end}}
+        <span class="chip">{{.MealCount}} GF {{$noun}}{{if ne .MealCount 1}}s{{end}}</span>
         {{template "groups_label" .Restaurant}}
       </p>
       {{/* A visible "this opens" cue; the whole row is the link. */}}
