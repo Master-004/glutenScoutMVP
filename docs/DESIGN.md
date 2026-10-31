@@ -99,7 +99,7 @@ Font: **Open Sans** (Google Fonts, weights 400/600/700/800). Fallback: `-apple-s
 
 **StarRating** — five stars, `star` / `star-empty`, 2px gap, half-star steps only. Sizes 22 / 18 / 15 / 14. Always paired with the count: "4.5 · 3,812 reviews".
 
-**FilterChip** — `surface` fill, 1px `divider`, `radius-pill`, `chip` text, 9×16 padding, optional 15px glyph in `brand-ink`. Selected: `brand` fill, `on-brand` text. Horizontal scroll, 10px gap. Examples: Celiac reports · Dedicated fryer · Within 2 mi · Verified this month.
+**FilterChip** — `surface` fill, 1px `divider`, `radius-pill`, `chip` text, 9×16 padding, optional 15px glyph in `brand-ink`. Selected: `brand` fill, `on-brand` text. Wraps onto another line when it doesn't fit, 10px gap. Examples: Celiac reports · Dedicated fryer · Within 2 mi · Verified this month.
 
 **Page layout** — restaurant page order: photo header → name, stars, hours → `band` → SafetyProfile → `band` → call-ahead → `band` → reports. Bands (8px `band`), not bordered cards, separate sections.
 
