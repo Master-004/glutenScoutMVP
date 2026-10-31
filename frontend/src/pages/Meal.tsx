@@ -2,14 +2,17 @@ import { useCallback, useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ScoutVideo } from "../components/ScoutVideo";
 import { GFBadge, Img, Rating, ReviewItem, Sheet } from "../components/ui";
-import { getMeal, getRestaurant, REVIEWER_TYPES, summarize, validateReview, type ReviewErrors } from "../lib/data";
+import { getMeal, getRestaurant, REVIEWER_TYPES, reviewerLabel, summarize, validateReview, type ReviewErrors } from "../lib/data";
 import { useStore } from "../lib/store";
 import { NotFound } from "./NotFound";
 import { BackLink } from "./Restaurant";
 
 function ReviewForm({ onSubmit }: { onSubmit(author: string, reviewerType: string, rating: number, body: string): void }) {
   const [author, setAuthor] = useState("");
-  const [reviewerType, setReviewerType] = useState("");
+  // Filled in from the start screen, so people aren't asked every time.
+  const saved = useStore().reviewerType;
+  const [reviewerType, setReviewerType] = useState(saved ?? "");
+  const [choosing, setChoosing] = useState(!saved);
   const [rating, setRating] = useState(0);
   const [body, setBody] = useState("");
   const [errors, setErrors] = useState<ReviewErrors>({});
@@ -27,18 +30,26 @@ function ReviewForm({ onSubmit }: { onSubmit(author: string, reviewerType: strin
         <label htmlFor="author">Display name <span className="optional">(optional)</span></label>
         <input id="author" maxLength={40} placeholder="Anonymous" value={author} onChange={(e) => setAuthor(e.target.value)} />
       </div>
-      <fieldset className="field">
-        <legend>Which describes you?</legend>
-        <div className="choices">
-          {REVIEWER_TYPES.map((t) => (
-            <label key={t.value} className="choice">
-              <input type="radio" name="reviewerType" value={t.value} checked={reviewerType === t.value} onChange={() => setReviewerType(t.value)} />
-              <span>{t.label}</span>
-            </label>
-          ))}
-        </div>
-        {errors.reviewerType && <p className="field-error" role="alert">{errors.reviewerType}</p>}
-      </fieldset>
+      {choosing ? (
+        <fieldset className="field">
+          <legend>Which describes you?</legend>
+          <div className="choices">
+            {REVIEWER_TYPES.map((t) => (
+              <label key={t.value} className="choice">
+                <input type="radio" name="reviewerType" value={t.value} checked={reviewerType === t.value} onChange={() => setReviewerType(t.value)} />
+                <span>{t.label}</span>
+              </label>
+            ))}
+          </div>
+          {errors.reviewerType && <p className="field-error" role="alert">{errors.reviewerType}</p>}
+        </fieldset>
+      ) : (
+        <p className="reviewing-as">
+          <span>Reviewing as <strong>{reviewerLabel(reviewerType)}</strong></span>
+          <button type="button" className="link-button" onClick={() => setChoosing(true)}>Change</button>
+        </p>
+      )}
+      {reviewerType !== "restaurant" && (
       <fieldset className="field">
         <legend>Food rating</legend>
         <div className="choices">
@@ -49,9 +60,10 @@ function ReviewForm({ onSubmit }: { onSubmit(author: string, reviewerType: strin
             </label>
           ))}
         </div>
-        <p className="hint">Rate the food, not gluten safety. Skip this if you work at the restaurant.</p>
+        <p className="hint">Rate the food, not gluten safety.</p>
         {errors.rating && <p className="field-error" role="alert">{errors.rating}</p>}
       </fieldset>
+      )}
       <div className="field">
         <label htmlFor="body">Your review</label>
         <textarea id="body" rows={4} placeholder="How did it go? Any tips for ordering?" value={body} onChange={(e) => setBody(e.target.value)} />

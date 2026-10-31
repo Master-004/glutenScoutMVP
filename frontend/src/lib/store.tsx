@@ -15,9 +15,12 @@ interface Saved {
   theme: Theme;
   videos: boolean;
   introSeen: boolean;
+  started: boolean; // has seen the first-time start screen
+  reviewerType: string | null; // Celiac, Strict GF...: filled in on their reviews
 }
 const EMPTY: Saved = {
   citySlug: null, savedRestaurants: [], upvotedMeals: [], myReviews: [], theme: "auto", videos: true, introSeen: false,
+  started: false, reviewerType: null,
 };
 const KEY = "glutenscout-prototype";
 
@@ -46,6 +49,9 @@ interface Store extends Saved {
   setTheme(theme: Theme): void;
   setVideos(on: boolean): void;
   markIntroSeen(): void;
+  finishStart(reviewerType: string | null): void;
+  setReviewerType(reviewerType: string | null): void;
+  restart(): void;
   reset(): void;
   reviewsFor(mealId: number): Review[];
 }
@@ -88,7 +94,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setTheme: (theme) => update(() => ({ theme })),
     setVideos: (videos) => update(() => ({ videos })),
     markIntroSeen: () => update(() => ({ introSeen: true })),
-    reset: () => update((s) => ({ ...EMPTY, introSeen: true, theme: s.theme, videos: s.videos })),
+    finishStart: (reviewerType) => update(() => ({ started: true, reviewerType })),
+    setReviewerType: (reviewerType) => update(() => ({ reviewerType })),
+    restart: () => update(() => ({ introSeen: false, started: false })),
+    reset: () => update((s) => ({ ...s, savedRestaurants: [], upvotedMeals: [], myReviews: [] })),
     // Newest first, with this visitor's own reviews included.
     reviewsFor: (mealId) => [...sampleReviews, ...state.myReviews]
       .filter((r) => r.mealId === mealId)

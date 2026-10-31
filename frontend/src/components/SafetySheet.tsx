@@ -6,23 +6,22 @@ export function StatusIcon({ level }: { level: SafetyLevel }) {
   return level === "none" ? Icons.unknown : <EvidenceIcon level={level} />;
 }
 
-// One tap target: the colored strip says what's known, so warnings stay on the
-// page even for someone who never opens the sheet. The green part stays the
-// same at every level, because checking is always the next step.
+// The status sits beside the button, so warnings stay on the page even for
+// someone who never opens the sheet. The button is green at every level,
+// because checking is always the next step.
 export function SafetyButton({ restaurantId, onClick }: { restaurantId: number; onClick(): void }) {
   const status = safetyStatus(restaurantId);
   return (
-    <button type="button" className="safety-button" onClick={onClick}>
-      <span className={`safety-strip status-${status.level}`}>
-        <span className="safety-strip-label"><StatusIcon level={status.level} />{status.label}</span>
-        {status.verifiedOn && <span className="safety-strip-date">Verified {shortDate(status.verifiedOn)}</span>}
-      </span>
-      <span className="safety-action">
+    <div className="safety-row">
+      <div className={`safety-status status-${status.level}`}>
+        <span className="safety-status-label"><StatusIcon level={status.level} />{status.label}</span>
+        {status.verifiedOn && <span className="safety-status-date">Verified {shortDate(status.verifiedOn)}</span>}
+      </div>
+      <button type="button" className="safety-button" onClick={onClick}>
         {Icons.clipboard}
-        <span className="safety-action-title">Check kitchen safety</span>
-        <span className="chevron" aria-hidden="true">›</span>
-      </span>
-    </button>
+        <span className="safety-button-title">Check kitchen safety</span>
+      </button>
+    </div>
   );
 }
 

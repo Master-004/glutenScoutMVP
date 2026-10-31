@@ -14,8 +14,10 @@ export function RestaurantRow({ result, foodType }: { result: SearchResult; food
       <p className="meta">{r.cuisine} · {r.address}</p>
       {/* The same status as the restaurant page: warnings are seen early. */}
       <p className="row-status">
-        <span className={`status-pill status-${status.level}`}><StatusIcon level={status.level} />{status.label}</span>
-        {status.verifiedOn && <span className="row-status-date">Verified {shortDate(status.verifiedOn)}</span>}
+        <span className={`status-pill status-${status.level}`}>
+          <StatusIcon level={status.level} />{status.label}
+          {status.verifiedOn && <span className="status-pill-date">· Verified {shortDate(status.verifiedOn)}</span>}
+        </span>
       </p>
       {matchedMeals.length > 0 && <p className="row-match">Has {matchedMeals.join(", ")}</p>}
       <p className="row-labels">
