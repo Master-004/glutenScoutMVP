@@ -1,0 +1,17 @@
+# Weekly update PRs for the React app's packages and the CI actions.
+# CI must pass on each one before it can merge.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # One PR for routine minor and patch updates instead of many.
+      minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

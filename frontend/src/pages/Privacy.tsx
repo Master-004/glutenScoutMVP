@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { clarityEnabled } from "../lib/clarity";
+import { monitoringEnabled } from "../lib/monitoring";
 import { useStore } from "../lib/store";
 import { BackLink } from "./Restaurant";
 
@@ -14,6 +15,12 @@ export function Privacy() {
       <p>GlutenScout is a prototype for people 18 and older. It uses sample data about fictional restaurants.</p>
       <h2 className="section-header">What stays on your device</h2>
       <p>Your city, saved places, reviews and the option you chose about your diet stay in this browser. They aren't sent to GlutenScout.</p>
+      {monitoringEnabled && (
+        <>
+          <h2 className="section-header">Error reports</h2>
+          <p>When something breaks, we send a report to Sentry so we can fix it. It says what went wrong, which page you were on, and your browser and device type. It doesn't include your name, IP address, what you typed or your dietary choice.</p>
+        </>
+      )}
       <h2 className="section-header">Session recordings</h2>
       {clarityEnabled ? (
         <>
