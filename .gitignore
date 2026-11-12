@@ -3,11 +3,6 @@
 .env.local
 .env.*.local
 
-# Build output
-/bin/
-/server
-*.exe
-
 # Editor / OS clutter
 .vscode/
 .idea/
