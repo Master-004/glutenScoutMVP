@@ -1,5 +1,7 @@
 # Local secrets / config — copy .env.example to .env instead
 .env
+.env.local
+.env.*.local
 
 # Build output
 /bin/
@@ -15,3 +17,5 @@ Thumbs.db
 # React prototype
 frontend/node_modules/
 frontend/dist/
+frontend/playwright-report/
+frontend/test-results/
